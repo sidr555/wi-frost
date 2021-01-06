@@ -1,0 +1,24 @@
+{
+    "brand": "Daewoo",
+    "model": "FR-530",
+    "image": "daewoo_fr_530.png",
+    "scheme": "scheme_fr530.jpg",
+    "instruction": "instr_fr530.pdf",
+    "compressor_min_sleep": 900,
+    "temp_sensors": [{
+        "id": 1,
+        "title": "Морозильная камера"
+    },{
+        "id": 2,
+        "title": "Холодильная камера"
+    },{
+        "id": 12,
+        "title": "Компрессор"
+    },{
+        "id": 10,
+        "title": "Блок управления"
+    },{
+        "id": 11,
+        "title": "В помещении"
+    }]
+}

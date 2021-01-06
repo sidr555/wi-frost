@@ -1,0 +1,7 @@
+{
+    "brand": "Daewoo",
+    "model": "FR-530",
+    "image": "images/daewoo/fr_530.png",
+    "scheme": "images/daewoo/scheme_fr_530.jpg",
+    "instruction": "instructions/instr_fr530.pdf"
+}

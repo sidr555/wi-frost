@@ -1,0 +1,18 @@
+{
+  "name": "wifrost-server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "http://http://git.maxdrv.ru:32768/sidr/wi-frost-server",
+  "author": "Dmitry Sidorov",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodejs ./index.js",
+    "watch": "nodemon ./index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "redis": "^3.0.2",
+    "ws": "^7.4.2"
+  }
+}
