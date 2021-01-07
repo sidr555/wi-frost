@@ -6,7 +6,7 @@ let conf = {
   ow: {
     pin: 4,
     tCheck: 10,
-    tSend: 30
+    tSend: 15
   },
   relays: {
     compr: 12,
@@ -42,7 +42,7 @@ let sensors = ow.search().reduce(function (obj, id) {
 let checkTemp = () => {
   Object.keys(sensors).forEach((id) => {
     sensors[id].dev.getTemp((temp) => {
-      // log("Check temperature", id, temp);
+      log("Check temp", id, temp);
       sensors[id].temp = temp;
     });
   });
@@ -119,61 +119,29 @@ require("Wifi").connect("Keenetic-0186", {password:"R838rPfr"}, (err) => {
     log("WiFi connected");
 
     disp.connect(() => {
-      disp.sub(topic, function(data) {
-        log("recieved MQTT", data);
-      });
       disp.pub(topic, ["Wi-Frost is ready", new Date()]);
+
+      // Periodically sends temperature to server
+      setInterval(() => {
+        disp.pub("wi-frost/temp", Object.keys(sensors).map((id) => {
+          return {
+            type: sensors[id].type,
+            id: id,
+            temperature: sensors[id].temp
+          };
+        }));
+      }, conf.ow.tSend * 1000);
+
     });
   }
 });
 
 
+disp.sub(topic, function(data) {
+  log("recieved MQTT", data);
+});
 
-// let wsT = 3000;
-// ws.connect((next) => {
-//   // log("Dispatcher connect");
-//   require("Wifi").connect("Keenetic-0186", {password:"R838rPfr"}, (err) => {
-//     if (!err) {
-//
 
-      // log("WiFi connected");
-
-      // let w = new WebSocket(conf.api.host, {
-      // let w = new (require("ws"))(conf.api.host, {
-      //   path: '/',
-      //   port: conf.api.wsport,
-      //   protocol: "echo-protocol",
-      //   protocolVersion: 13,
-      //   origin: 'Espruino',
-      //   keepAlive: 600,
-      //   //headers:{}
-      // });
-      //
-      // setTimeout(() => {
-      //   if (!w.connected) {
-      //     wsT *= 2;
-      //     log("Reconnect WS in " + wsT / 1000 + "sec.");
-      //     ws.connect();
-      //   } else {
-      //     wsT = 3000;
-      //   }
-      // }, wsT);
-      //
-      // next(w);
-//     }
-//   });
-// });
-
-// Periodically sends temperature to server
-// setInterval(() => {
-//   ws.send("temperature", Object.keys(sensors).map((id) => {
-//     return {
-//       type: sensors[id].type,
-//       id: id,
-//       temperature: sensors[id].temp
-//     };
-//   }));
-// }, conf.ow.tSend * 1000);
 /*
 
 
