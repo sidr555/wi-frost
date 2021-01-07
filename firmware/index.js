@@ -56,8 +56,8 @@ setInterval(checkTemp, conf.ow.tCheck * 1000);
 
 //
 // // Initialize WebSocket auto reconnection dispatcher
-const WSDispatcher = require("dispatcher");
-let ws = new WSDispatcher();
+// const WSDispatcher = require("dispatcher");
+// let ws = new WSDispatcher();
 //
 // // Set some WS message handlers
 // ws.on("connect", () => {
@@ -102,11 +102,40 @@ let ws = new WSDispatcher();
 //
 //
 //
-let wsT = 3000;
-ws.connect((next) => {
-  // log("Dispatcher connect");
-  require("Wifi").connect("Keenetic-018600", {password:"R008rPfr"}, (err) => {
-    if (!err) {
+
+let topic = "wi-frost/temp"
+
+
+
+let disp = require("dispatcher.mqtt").create("*Wi-Frost*", {
+  host: "192.168.0.41",
+  port: 1883,
+  username: "wuser",
+  password: "wuserp",
+});
+
+require("Wifi").connect("Keenetic-0186", {password:"R838rPfr"}, (err) => {
+  if (!err) {
+    log("WiFi connected");
+
+    disp.connect(() => {
+      disp.sub(topic, function(data) {
+        log("recieved MQTT", data);
+      });
+      disp.pub(topic, ["Wi-Frost is ready", new Date()]);
+    });
+  }
+});
+
+
+
+// let wsT = 3000;
+// ws.connect((next) => {
+//   // log("Dispatcher connect");
+//   require("Wifi").connect("Keenetic-0186", {password:"R838rPfr"}, (err) => {
+//     if (!err) {
+//
+
       // log("WiFi connected");
 
       // let w = new WebSocket(conf.api.host, {
@@ -131,9 +160,9 @@ ws.connect((next) => {
       // }, wsT);
       //
       // next(w);
-    }
-  });
-});
+//     }
+//   });
+// });
 
 // Periodically sends temperature to server
 // setInterval(() => {
@@ -145,6 +174,7 @@ ws.connect((next) => {
 //     };
 //   }));
 // }, conf.ow.tSend * 1000);
+/*
 
 
 let now = require("now").Now;
@@ -248,18 +278,19 @@ let worker = {
 }
 
 
-worker.run("start");
-setTimeout(() => worker.run("freeze"), 5000);
-setTimeout(() => worker.run("heat"), 8000);
-
-setInterval(worker.loop, conf.job.tLoop * 1000);
+// worker.run("start");
+// setTimeout(() => worker.run("freeze"), 5000);
+// setTimeout(() => worker.run("heat"), 8000);
+//
+// setInterval(worker.loop, conf.job.tLoop * 1000);
 
 // ws.on("setjob", (job) => {
 //   log("setjob", job);
 //   worker.run(job, true);
 // });
 
-let esp = require("ESP8266");
-log("Free flash", esp.getFreeFlash());
-esp.setCPUFreq(160);
-log("State", esp.getState());
+// let esp = require("ESP8266");
+// log("Free flash", esp.getFreeFlash());
+// esp.setCPUFreq(160);
+// log("State", esp.getState());
+*/

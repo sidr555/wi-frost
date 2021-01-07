@@ -1,23 +1,24 @@
 // import logo from './logo.svg';
 import React, {useEffect, useState} from 'react';
+// import Status from './Status';
 import './App.css';
 import {
     AppBar, BottomNavigation, BottomNavigationAction,
-    Box,
+    // Box,
     Button,
-    Card, CardActions,
-    CardContent,
-    CardMedia,
+    // Card, CardActions,
+    // CardContent,
+    // CardMedia,
     Container,
-    Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
+    // Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
     Grid,
-    IconButton,
+    // IconButton,
     // Menu, MenuItem,
-    Paper, TextField,
+    // Paper, TextField,
     Toolbar,
     Typography
 } from "@material-ui/core";
-import MenuIcon from '@material-ui/icons/Menu';
+// import MenuIcon from '@material-ui/icons/Menu';
 // import LayerIcon from '@material-ui/icons/Layers';
 import {makeStyles} from "@material-ui/core/styles";
 // import AccountCircle from "@material-ui/icons/AccountCircle";
@@ -35,6 +36,11 @@ import StateItem from "./StateItem";
 import StateSectionTitle from "./StateSectionTitle";
 import AppMenu from "./AppMenu";
 import API from "./Api";
+
+// import { Connector } from 'mqtt-react-hooks';
+
+
+
 
 
 const useStyles = makeStyles((theme) => ({
@@ -85,6 +91,24 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+
+
+const topic = "wifrost/temp"
+// const mqtt    = require('mqtt');
+// var options = {
+//     protocol: 'mqtts',
+//     // clientId uniquely identifies client
+//     // choose any string you wish
+//     clientId: 'b0908853'
+// };
+// var client  = mqtt.connect('mqtt://test.mosquitto.org:8081', options);
+// // let client  = mqtt.connect('tcp://192.168.0.41:1883', options);
+// // const client = mqtt.connect('mqtt://broker.hivemq.com')
+// // preciouschicken.com is the MQTT topic
+// // client.subscribe('preciouschicken.com');
+// client.subscribe(topic);
+
+
 function App() {
     const classes = useStyles();
     const [auth, setAuth] = React.useState(true);
@@ -114,6 +138,109 @@ function App() {
         instruction: "",
         temp_sensors: {}
     });
+
+
+    //
+    //
+    //
+    // let note;
+    // client.on('message', function (topic, message) {
+    //     note = message.toString();
+    //     // Updates React state with message
+    //     setMesg(note);
+    //     console.log(note);
+    //     client.end();
+    // });
+    // client.on('connected', function () {
+    //     client.publish(topic, "sssss");
+    // });
+    //
+    // // Sets default React state
+    // const [mesg, setMesg] = useState("nothing heard");
+
+
+
+    // client.on('message', function (topic, message) {
+    //     note = message.toString();
+    //     // Updates React state with message
+    //     setMesg(note);
+    //     console.log(note);
+    //     client.end();
+    // });
+
+    // Sets default React state
+    // const [mesg, setMesg] = useState(<Fragment><em>nothing heard</em></Fragment>);
+
+
+    // const setConnectStatus = console.log;
+    // const setPayload = console.log;
+    //
+    // const [client, setClient] = useState(null);
+    // //
+    // const mqttConnect = (host, mqttOption) => {
+    //
+    //     setConnectStatus('Connecting');
+    //     setClient(mqtt.connect(host, mqttOption));
+    // };
+    //
+    // mqttConnect('tcp://192.168.0.41', {
+    //     port: 1883,
+    //     user: "sidr",
+    //     password: "11132",
+    //     keepalive: 10000
+    // });
+    //
+    // useEffect(() => {
+    //     if (client) {
+    //         console.log(client)
+    //         client.on('connect', () => {
+    //             setConnectStatus('Connected');
+    //             client.subscribe(topic);
+    //
+    //         });
+    //         client.on('error', (err) => {
+    //             console.error('Connection error: ', err);
+    //             client.end();
+    //         });
+    //         client.on('reconnect', () => {
+    //             setConnectStatus('Reconnecting');
+    //         });
+    //         client.on('message', (topic, message) => {
+    //             const payload = { topic, message: message.toString() };
+    //             setPayload(payload);
+    //         });
+    //     }
+    // // }, []);
+    // }, [client]);
+    //
+
+
+
+    //https://www.emqx.io/blog/how-to-use-mqtt-in-react
+    const [client, setClient] = useState(null);
+    const mqttConnect = (host, mqttOption) => {
+        setConnectStatus('Connecting');
+        setClient(mqtt.connect(host, mqttOption));
+    };
+    useEffect(() => {
+        if (client) {
+            console.log(client)
+            client.on('connect', () => {
+                setConnectStatus('Connected');
+            });
+            client.on('error', (err) => {
+                console.error('Connection error: ', err);
+                client.end();
+            });
+            client.on('reconnect', () => {
+                setConnectStatus('Reconnecting');
+            });
+            client.on('message', (topic, message) => {
+                const payload = { topic, message: message.toString() };
+                setPayload(payload);
+            });
+        }
+    }, [client]);
 
 
 
@@ -183,17 +310,22 @@ function App() {
                 console.log("Config loaded", config);
             });
 
-        setInterval(() => {
-            API.get("/state")
-                .then(response => response.json())
-                .then(state => {
-                    setState(state)
-                    console.log("State loaded", state);
-                });
-        }, 3000);
+        // setInterval(() => {
+        //     API.get("/state")
+        //         .then(response => response.json())
+        //         .then(state => {
+        //             setState(state)
+        //             console.log("State loaded", state);
+        //         });
+        // }, 3000);
     }, ['state']);
     return (
-        <>
+        <div>
+
+        {/*<Connector mqttProps="mqtt://test.mosquitto.org:8080">*/}
+        {/*<Connector mqttProps="mqtt://192.168.0.41:1883">*/}
+        {/*<Connector brokerUrl="ws://192.168.0.41:8083">*/}
+
             <AppBar position="fixed">
                 <Container fixed>
                     <Toolbar>
@@ -216,6 +348,11 @@ function App() {
                             gutterBottom
                         >{config.brand} {config.model}</Typography>
 
+
+                        {/*<h1>A taste of MQTT in React</h1>*/}
+                        {/*<p>The message is: {mesg}</p>*/}
+
+                        {/*<Status />*/}
 
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={4} md={4} lg={4} align="right">
@@ -296,7 +433,8 @@ function App() {
                     </Container>
                 </div>
             </main>
-        </>
+        {/*</Connector>*/}
+        </div>
     );
 }
 

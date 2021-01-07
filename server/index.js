@@ -24,6 +24,32 @@ app.use(bodyParser.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
 
+//
+//
+// // MQTT server
+// const aedes = require('aedes')()
+// const mqtt_server = require('net').createServer(aedes.handle)
+// const mqtt_port = 8883
+//
+// mqtt_server.on('clientReady', function(client) {
+//     console.log('MQTT client connected', client.id);
+// });
+//
+// // fired when a message is received
+// mqtt_server.on('publish', function(packet, client) {
+//     console.log('MQTT Published', packet.payload, client);
+// });
+//
+// mqtt_server.listen(mqtt_port, function () {
+//     console.log('MQTT server started and listening on port ', mqtt_port)
+// })
+//
+//
+
+
+
+
+
 
 const WSDispatcher = require("./dispatcher");
 const WebSocketServer = require('ws').Server;
