@@ -15,7 +15,7 @@ let Dispatcher = function(name, params) {
                         }
                     });
 
-                    console.log(name, ">> connected");
+                    // console.log(name, ">> connected");
 
                     if (typeof next === "function") {
                         next();

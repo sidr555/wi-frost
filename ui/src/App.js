@@ -3,7 +3,7 @@ import React, {useEffect, useState} from 'react';
 // import Status from './Status';
 import './App.css';
 import {
-    AppBar, BottomNavigation, BottomNavigationAction,
+    AppBar, //BottomNavigation, BottomNavigationAction,
     // Box,
     Button,
     // Card, CardActions,
@@ -93,20 +93,9 @@ const useStyles = makeStyles((theme) => ({
 
 
 
-const topic = "wifrost/temp"
-// const mqtt    = require('mqtt');
-// var options = {
-//     protocol: 'mqtts',
-//     // clientId uniquely identifies client
-//     // choose any string you wish
-//     clientId: 'b0908853'
-// };
-// var client  = mqtt.connect('mqtt://test.mosquitto.org:8081', options);
-// // let client  = mqtt.connect('tcp://192.168.0.41:1883', options);
-// // const client = mqtt.connect('mqtt://broker.hivemq.com')
-// // preciouschicken.com is the MQTT topic
-// // client.subscribe('preciouschicken.com');
-// client.subscribe(topic);
+//const topic = "wifrost/temp"
+const mqtt    = require('mqtt');
+
 
 
 function App() {
@@ -172,49 +161,71 @@ function App() {
     // const [mesg, setMesg] = useState(<Fragment><em>nothing heard</em></Fragment>);
 
 
-    // const setConnectStatus = console.log;
-    // const setPayload = console.log;
-    //
-    // const [client, setClient] = useState(null);
-    // //
-    // const mqttConnect = (host, mqttOption) => {
-    //
-    //     setConnectStatus('Connecting');
-    //     setClient(mqtt.connect(host, mqttOption));
-    // };
-    //
-    // mqttConnect('tcp://192.168.0.41', {
-    //     port: 1883,
-    //     user: "sidr",
-    //     password: "11132",
-    //     keepalive: 10000
-    // });
-    //
-    // useEffect(() => {
-    //     if (client) {
-    //         console.log(client)
-    //         client.on('connect', () => {
-    //             setConnectStatus('Connected');
-    //             client.subscribe(topic);
-    //
-    //         });
-    //         client.on('error', (err) => {
-    //             console.error('Connection error: ', err);
-    //             client.end();
-    //         });
-    //         client.on('reconnect', () => {
-    //             setConnectStatus('Reconnecting');
-    //         });
-    //         client.on('message', (topic, message) => {
-    //             const payload = { topic, message: message.toString() };
-    //             setPayload(payload);
-    //         });
-    //     }
-    // // }, []);
-    // }, [client]);
-    //
+    const setConnectStatus = console.log;
+    const setPayload = console.log;
+
+    const [client, setClient] = useState(null);
+
+    const mqttConnect = (host, mqttOption) => {
+
+        setConnectStatus('Connecting');
+        setClient(mqtt.connect(host, mqttOption));
+        console.log("client", client)
+    };
+
+    mqttConnect('mqtt://192.168.0.41:1883', {
+        protocol: 'mqtt',
+        // clientId uniquely identifies client
+        // choose any string you wish
+        user: "wuser",
+        //
+        // user: "mosquitto",
+        password: "wuserp",
+        clientId: 'b0908853'
+    });
+
+//     let cl  = mqtt.connect('mqtt://192.168.0.41:1883', {
+//         protocol: 'mqtt',
+//         // clientId uniquely identifies client
+//         // choose any string you wish
+//         user: "wuser",
+//         password: "wuserp",
+//         clientId: 'b0908853'
+//     });
+// // client.subscribe(topic);
+//     console.log(cl);
 
 
+
+    useEffect(() => {
+        if (client) {
+            console.log(client)
+            client.on('connect', () => {
+                setConnectStatus('Connected');
+                client.subscribe("wi-frost/state");
+
+            });
+            client.on('error', (err) => {
+                console.error('Connection error: ', err);
+                client.end();
+            });
+            client.on('reconnect', () => {
+                setConnectStatus('Reconnecting');
+            });
+            client.on('message', (topic, message) => {
+                const payload = { topic, message: message.toString() };
+                setPayload(payload);
+            });
+        }
+    // }, []);
+    }, [client]);
+
+
+/*
+
+
+    const setConnectStatus = console.log;
+    const setPayload = console.log;
 
     //https://www.emqx.io/blog/how-to-use-mqtt-in-react
     const [client, setClient] = useState(null);
@@ -242,6 +253,7 @@ function App() {
         }
     }, [client]);
 
+*/
 
 
     const jobs = {
@@ -319,6 +331,11 @@ function App() {
         //         });
         // }, 3000);
     }, ['state']);
+
+
+
+
+
     return (
         <div>
 

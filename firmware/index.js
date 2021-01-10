@@ -28,86 +28,34 @@ let log = console.log;
 // Initialize DS18B20 temperature sensors and send statistics via WebSockets
 
 const ow = new OneWire(conf.ow.pin);
-let sensors = ow.search().reduce(function (obj, id) {
-  let d = require("DS18B20").connect(ow, id);
-  obj[id] = {
-    type: "unknown",
-    dev: d,
-    temp: null
+let sensors = ow.search().map(function (id) {
+  let dev = require("DS18B20").connect(ow, id);
+
+  let obj = {
+    id: id,
+    dev: dev,
+    check: () => {
+      dev.getTemp((temp) => {
+        obj.temp = temp;
+        // log("Check temp", id, temp);
+      });
+    }
   };
+  obj.check();
+  setInterval(obj.check, conf.ow.tCheck * 1000);
   return obj;
 }, {});
 
-// зададим интервал опроса датчиков
-let checkTemp = () => {
-  Object.keys(sensors).forEach((id) => {
-    sensors[id].dev.getTemp((temp) => {
-      log("Check temp", id, temp);
-      sensors[id].temp = temp;
-    });
-  });
+let topic = "wi-frost/state";
+
+let tempMap = {
+  "284d341104000093": "moroz",
+  "28bf19110400009b": "body"
 };
-checkTemp();
-setInterval(checkTemp, conf.ow.tCheck * 1000);
 
 
-
-
-
-//
-// // Initialize WebSocket auto reconnection dispatcher
-// const WSDispatcher = require("dispatcher");
-// let ws = new WSDispatcher();
-//
-// // Set some WS message handlers
-// ws.on("connect", () => {
-//   // ws.send("config");
-//   ws.send("limits");
-//   ws.send("sensors");
-// });
-//
-// // ws.on("error", (err) => {
-// //   log("error handler", err);
-// // });
-//
-// ws.on("close", () => {
-//   // log("close handler");
-//   setTimeout(() => {
-//     ws.connect();
-//   }, 3000)
-// });
-//
-//
-// // ws.on("config", (data) => {
-// //   // log("config handler", data);
-// //   conf.device = data;
-// // });
-// ws.on("sensors", (data) => {
-//   // log("sensors handler", data);
-//   // delete conf.sensors;
-//   conf.sensors = data;
-//   let s = Object.keys(conf.sensors).map((type) => {
-//      let id = conf.sensors[type];
-//      if (id && sensors[id]) {
-//        sensors[id].type = type;
-//      }
-//      return null;
-//   });
-//
-// });
-// ws.on("limits", (data) => {
-//   // log("limits handler", data);
-//   conf.lims = data;
-// });
-//
-//
-//
-
-let topic = "wi-frost/temp"
-
-
-
-let disp = require("dispatcher.mqtt").create("*Wi-Frost*", {
+const Mqtt = require("mqtt");
+let disp = new Mqtt("*Wi-Frost*", {
   host: "192.168.0.41",
   port: 1883,
   username: "wuser",
@@ -121,15 +69,26 @@ require("Wifi").connect("Keenetic-0186", {password:"R838rPfr"}, (err) => {
     disp.connect(() => {
       disp.pub(topic, ["Wi-Frost is ready", new Date()]);
 
+      disp.sub("wi-frost/do", (job) => {
+        log("JOB recieved", job);
+        worker.run(job, true, "from mqtt");
+      })
+
       // Periodically sends temperature to server
       setInterval(() => {
-        disp.pub("wi-frost/temp", Object.keys(sensors).map((id) => {
-          return {
-            type: sensors[id].type,
-            id: id,
-            temperature: sensors[id].temp
-          };
-        }));
+        // console.log("Send temps", sensors);
+        sensors.forEach((obj) => {
+          if (obj.temp) {
+            if (tempMap[obj.id]) {
+              disp.pub("wi-frost/temp/" + tempMap[obj.id], [obj.temp]);
+              console.log("send wi-frost/temp/" + tempMap[obj.id], obj.id, obj.temp)
+            } else {
+              disp.pub("wi-frost/temp/other", [obj.id, obj.temp]);
+              console.log("send wi-frost/temp/other", [obj.id, obj.temp])
+            }
+          }
+        });
+        // disp.pub("wi-frost/temp", temp);
       }, conf.ow.tSend * 1000);
 
     });
@@ -142,7 +101,7 @@ disp.sub(topic, function(data) {
 });
 
 
-/*
+
 
 
 let now = require("now").Now;
@@ -169,7 +128,7 @@ let worker = {
   freeze: (force) => heater.off(force) && compressor.on(force),
   start: () => {},
 
-  run(job, force, reason) {
+  run: (job, force, reason) => {
     // log("worker run job", job, force);
     if (job !== worker.job &&
         typeof worker[job] === "function" &&
@@ -185,16 +144,17 @@ let worker = {
     }
   },
 
-  loop() {
+  loop: () => {
     if (!conf.lims) return;
 
     let time = now(),
         hour = (new Date()).getHours(),
-        temp = Object.keys(conf.sensors).reduce((obj, key) => {
-          // console.log("temp", key, conf.sensors[key], sensors[conf.sensors[key]]);
-          obj[key] = sensors[conf.sensors[key]] ? sensors[conf.sensors[key]].temp : false;
-          return obj;
-        }, {});
+        // temp = Object.keys(conf.sensors).reduce((obj, key) => {
+        //   // console.log("temp", key, conf.sensors[key], sensors[conf.sensors[key]]);
+        //   obj[key] = sensors[conf.sensors[key]] ? sensors[conf.sensors[key]].temp : false;
+        //   return obj;
+        // }, {});
+        temp = {}
 
     log("JOB LOOP", worker.job, hour, temp);
 
@@ -247,18 +207,15 @@ let worker = {
 
 
 // worker.run("start");
-// setTimeout(() => worker.run("freeze"), 5000);
-// setTimeout(() => worker.run("heat"), 8000);
+setTimeout(() => worker.run("freeze"), 5000);
+setTimeout(() => worker.run("heat"), 8000);
 //
-// setInterval(worker.loop, conf.job.tLoop * 1000);
+setInterval(worker.loop, conf.job.tLoop * 1000);
 
-// ws.on("setjob", (job) => {
-//   log("setjob", job);
-//   worker.run(job, true);
-// });
 
 // let esp = require("ESP8266");
 // log("Free flash", esp.getFreeFlash());
 // esp.setCPUFreq(160);
 // log("State", esp.getState());
-*/
+
+

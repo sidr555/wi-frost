@@ -2,8 +2,9 @@
 module.exports = {
     create: function(name, params) {
         let host = params.host;
-        let connected = false;
-        let rectime = 3000;
+        let connected = false,
+            inited = false,
+            rectime = 3000;
 
         params.host = null;
         let mqtt = require("tinyMQTT").create(host, params);
@@ -11,11 +12,11 @@ module.exports = {
 
         let dispetcher =  require("dispatcher").create((name || "mqtt_client"), {
             connect: (next) => {
+                console.log("dispatcher.mqtt>> connect", mqtt, connected, typeof next)
                 if (!connected) {
-                    // console.log("dispatcher.mqtt>> ", "connect", mqtt)
                     mqtt.connect();
                     mqtt.on('connected', () => {
-                        // console.log("dispetcher.mqtt connected>>", typeof next);
+                        console.log("dispatcher.mqtt connected>>", typeof next);
                         connected = true;
                         rectime = 3000;
                         if(typeof next === "function") {
@@ -25,13 +26,19 @@ module.exports = {
                 }
             },
             init: (handle) => {
-                // console.log("dispatcher.mqtt>> init", typeof handle)
+                if (inited) return;
+                console.log("dispatcher.mqtt>> init", typeof handle)
                 mqtt.on('disconnected', () => {
-                    console.log(dispetcher.mqtt, 'closed');
+                    console.log('dispatcher.mqtt', 'closed');
                     setTimeout(mqtt.connect, rectime);
-                    rectime *= 2;
+                    if (rectime < 60000) rectime *= 2;
                     handle("close");
-                    mqtt = null;
+                    connected = false;
+                   //mqtt = null;
+                });
+
+                mqtt.on('error', (err) => {
+                    console.log('dispatcher.mqtt>> error', err);
                 });
 
                 mqtt.on('message', (data) => {
@@ -43,14 +50,18 @@ module.exports = {
                     // console.log("dispetcher.mqtt handle data", data.topic, data.message);
                     handle(data.topic, data.message);
                 });
+
+                inited = true;
             },
             pub: (topic, data) => {
+                if (!connected) return;
                 if (typeof data === "object") {
                     data = JSON.stringify(data);
                 }
                 mqtt.publish(topic, data);
             },
             sub: (topic, handle) => {
+                if (!connected) return;
                 console.log("dispatcher.mqtt>> sub", topic);
                 mqtt.subscribe(topic);
             }

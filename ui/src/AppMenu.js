@@ -2,9 +2,9 @@ import React from 'react';
 import {
     IconButton,
     Menu,
-    MenuItem, Toolbar
+    MenuItem, //Toolbar
 } from "@material-ui/core";
-import AccountCircle from "@material-ui/icons/AccountCircle";
+//import AccountCircle from "@material-ui/icons/AccountCircle";
 import MenuIcon from "@material-ui/icons/Menu";
 import {makeStyles} from "@material-ui/core/styles";
 
