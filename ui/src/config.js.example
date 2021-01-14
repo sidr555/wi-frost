@@ -1,0 +1,13 @@
+let config = {
+    location: 'myhome',
+    mqtt: {
+        host: 'mqtt://broker.emqx.io:8083',
+        options: {
+            username: "user",
+            password: "password",
+            clientId: 'myId'
+        },
+    }
+};
+
+export default config;

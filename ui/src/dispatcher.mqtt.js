@@ -30,7 +30,7 @@ let mqttdisp = {
                             connected = true;
                             rectime = 3000;
                             if(typeof next === "function") {
-                                next();
+                                next(client);
                             }
                         }
                     });

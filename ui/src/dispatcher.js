@@ -6,7 +6,7 @@ let Dispatcher = function(name, params) {
     this.connect = (next) => {
         console.log("dispatcher>> connect");
         if (typeof params.connect === "function") {
-            params.connect(() => {
+            params.connect((client) => {
                 if (typeof params.init === "function") {
                     params.init((topic, data) => {
 //                        console.log(name, ">> looking for handler", topic, typeof lst[topic], lst);
@@ -17,7 +17,7 @@ let Dispatcher = function(name, params) {
                     });
 
                     if (typeof next === "function") {
-                        next();
+                        next(client);
                     }
                 }
             });
