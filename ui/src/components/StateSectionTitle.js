@@ -1,7 +1,7 @@
 import React from 'react';
 import {Grid, Typography} from "@material-ui/core";
 
-export default ({title}) => {
+const StateSectionTitle = ({title}) => {
     return (
         <>
             <Grid container>
@@ -17,3 +17,5 @@ export default ({title}) => {
         </>
     )
 }
+
+export default StateSectionTitle;

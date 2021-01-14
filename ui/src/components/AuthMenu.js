@@ -8,7 +8,7 @@ import AccountCircle from "@material-ui/icons/AccountCircle";
 import LoginForm from "./LoginForm";
 
 
-function AuthMenu({auth, onAuthorized, onLogout}) {
+function AuthMenu({config, auth, onAuthorized, onLogout}) {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const openMenu = (event) => {
         setAnchorEl(event.currentTarget);
@@ -55,7 +55,7 @@ function AuthMenu({auth, onAuthorized, onLogout}) {
             </div>
             }
 
-            {auth || <LoginForm onAuthorized={() => onAuthorized()}/>}
+            {auth || <LoginForm onAuthorized={() => onAuthorized()} config={config}/>}
         </div>
     );
 }

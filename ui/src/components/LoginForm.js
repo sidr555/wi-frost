@@ -1,12 +1,12 @@
 import React from 'react';
 import {
-    Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField
+    Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField
 } from "@material-ui/core";
 
 
-function LoginForm({onAuthorized}) {
-    const [email, setEmail] = React.useState("sidr@sidora.net");
-    const [pass, setPass] = React.useState("12345");
+function LoginForm({onAuthorized, config}) {
+    const [email, setEmail] = React.useState(config.user.email);
+    const [pass, setPass] = React.useState();
 
     const [open, setOpen] = React.useState(false);
 
@@ -44,7 +44,7 @@ function LoginForm({onAuthorized}) {
             <Dialog
                 open={open}
                 onClose={closeForm}
-                aria-labeledby="form-dialog-title"
+                aria-labelledby="form-dialog-title"
             >
                 <DialogTitle id="form-dialog-title">Вход</DialogTitle>
                 <DialogContent>

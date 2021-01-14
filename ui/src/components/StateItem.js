@@ -1,7 +1,7 @@
 import React from 'react';
 import {Container, Grid, Typography} from "@material-ui/core";
 
-export default ({title, value}) => {
+const StateItem = ({title, value}) => {
     return (
         <Container>
             <Grid container spacing={2}>
@@ -20,3 +20,5 @@ export default ({title, value}) => {
         </Container>
     )
 }
+
+export default StateItem;

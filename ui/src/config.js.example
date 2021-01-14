@@ -1,4 +1,8 @@
 let config = {
+    user: {
+        email: 'my@email.com',
+        name: 'Bobby'
+    },
     location: 'myhome',
     mqtt: {
         host: 'mqtt://broker.emqx.io:8083',

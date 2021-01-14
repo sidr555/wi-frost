@@ -1,15 +1,15 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import './App.css';
 import {
     AppBar, //BottomNavigation, BottomNavigationAction,
     // Box,
-    Button,
+//    Button,
     // Card, CardActions,
     // CardContent,
     // CardMedia,
     Container,
     // Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
-    Grid,
+//    Grid,
     IconButton,
     // Menu, MenuItem,
     // Paper, TextField,
@@ -32,14 +32,19 @@ import LinkOn from "@material-ui/icons/Link";
 
 import AuthMenu from "./components/AuthMenu";
 
-import StateItem from "./components/StateItem";
-import StateSectionTitle from "./components/StateSectionTitle";
 import AppMenu from "./components/AppMenu";
-import API from "./Api";
+
+
+import Freezer from "./devices/Freezer";
+
 
 
 import globalConfig from './config';
 import Dispatcher from './dispatcher.mqtt'
+
+
+
+
 
 
 
@@ -103,69 +108,6 @@ const useStyles = makeStyles((theme) => ({
 function App() {
     const classes = useStyles();
     const [auth, setAuth] = React.useState(true);
-    const [state, setState] = React.useState({
-        uptime: 159200,
-        job: 'none',
-        jobtime: 1243,
-        compressor_sleeptime: 16000,
-        temperature: {
-            moroz: null,
-            body: null,
-            unit: null,
-            room: null,
-            compressor: null
-            // moroz: -16.3,
-            // body: -6.7,
-            // unit: 27.3,
-            // room: 22.8,
-            // compressor: 56.8
-        },
-    });
-    const [config, setConfig] = React.useState({
-        brand: "Daewoo",
-        model: "FR-530",
-        image: "",
-        scheme: "",
-        instruction: "",
-        temp_sensors: {}
-    });
-
-
-
-    const jobs = {
-        none: "Недоступен",
-        sleep: "Сон",
-        freeze: "Охлаждение",
-        heat: "Разморозка",
-        danger: "Авария"
-    };
-    const temp_sensors = {
-        moroz: "Морозильная камера",
-        body: "Холодильная камера",
-        compressor: "Компрессор",
-        unit: "Блок управления",
-        room: "Помещение"
-    };
-
-    const niceTime = (sec) => {
-        if (sec < 45) {
-            return  parseInt(sec) + " сек.";
-        } else if (sec < 90) {
-            return "1 мин.";
-        } else if (sec < 150) {
-            return "2 мин.";
-        } else if (sec < 3600) {
-            return parseInt(sec / 60) + " мин."
-        } else if (sec < 2 * 86400) {
-            return parseInt(sec / 3600) + " час."
-        } else {
-            return parseInt(sec / 86400) + " дн."
-        }
-    };
-
-    const niceTimeDiff = (time) => {
-        return time > 0 ? niceTime((new Date()).getTime() / 1000 - time) : "-";
-    }
 
     const [client, setClient] = React.useState({});
     useEffect(() => {
@@ -179,7 +121,7 @@ function App() {
 
             setClient(mqttClient);
 
-            mqtt.sub(config.location + '/ping', function (data) {
+            mqtt.sub(globalConfig.location + '/ping', function (data) {
                 mqtt.pub(globalConfig.location + '/pong', 1)
             });
 
@@ -197,47 +139,6 @@ function App() {
 
 
 
-    const changeJob = (job) => {
-        API.get("/setjob/" + job, () => {
-            setState(prevState => {
-                prevState.jobtime = 0;
-                prevState.job = job;
-                return prevState;
-            });
-            // state.jobtime = 0;
-            // state.job = job;
-            // setState(state);
-            console.log("changejob", job, state);
-        });
-    }
-
-    const getFanState = () => {
-        if (state.job === "none") {
-            return "-";
-        } else if (state.job === "heat" && state.job_time > 0) {
-            return "Отключен";
-        }
-        return "Работает";
-    }
-
-    useEffect(() => {
-        API.get("/config")
-            .then(response => response.json())
-            .then(config => {
-                setConfig(config)
-                console.log("Config loaded", config);
-            });
-
-        // setInterval(() => {
-        //     API.get("/state")
-        //         .then(response => response.json())
-        //         .then(state => {
-        //             setState(state)
-        //             console.log("State loaded", state);
-        //         });
-        // }, 3000);
-    }, ['state']);
-
 
 
     return (
@@ -245,12 +146,13 @@ function App() {
             <AppBar position="fixed">
                 <Container fixed>
                     <Toolbar>
-                        <AppMenu instruction={config.instruction}/>
+                        <AppMenu instruction={'aaa' /*config.instruction*/}/>
 
                         <Typography variant="h5" align="center" className={classes.title}>Wi-Frost</Typography>
 
                         <IconButton aria-label="MQTT link" color="inherit">
-                            {client.connected && <LinkOn /> || <LinkOff />}
+                            {client.connected && <LinkOn />}
+                            {client.connected || <LinkOff />}
                         </IconButton>
 
 
@@ -262,88 +164,10 @@ function App() {
             <main>
                 <div className={classes.mainContent}>
                     <Container maxWidth="md">
-                        <Typography
-                            variant="h2"
-                            align="center"
-                            color="textPrimary"
-                            gutterBottom
-                        >{config.brand} {config.model}</Typography>
 
-                        <Grid container spacing={2}>
-                            <Grid item xs={12} sm={4} md={4} lg={4} align="right">
-                                <img className={classes.img} alt={config.brand + '' + config.model} src={config.image}/>
-                            </Grid>
-                            <Grid item xs={12} sm={8} md={8} lg={8} container alignContent="space-between">
-                                <StateSectionTitle title="Состояние" />
-                                <StateItem key="uptime" title="Общее время работы" value={niceTimeDiff(state.start_time)} />
+                        <Freezer classes={classes} auth={auth}/>
 
-                                <StateItem key="job" title="Текущее состояние" value={jobs[state.job]} />
 
-                                <StateItem key="time" title="В течение" value={niceTimeDiff(state.job_time)} />
-                                <StateItem key="fan" title="Вентилятор" value={getFanState()} />
-
-                                <StateSectionTitle title="Температура"/>
-                                    {Object.keys(config.temp_sensors).map((key, index) => {
-                                        let temp = " ̊ C";
-                                        if (state.temperature[key]) {
-                                            temp = state.temperature[key] + temp;
-                                            if (state.temperature[key] > 0) {
-                                                temp = "+" + temp;
-                                            }
-                                        } else {
-                                            temp = "-";
-                                        }
-                                        return <StateItem key={"temp_" + key} title={temp_sensors[key]} value={temp}/>
-                                    })}
-
-                                    {auth && state.job !== "none" &&
-                                    <Grid container>
-                                        <StateSectionTitle title="Изменить режим работы"/>
-
-                                        <Grid item xs={12}>
-                                            <div className={classes.mainButtons}>
-                                                <Grid container spacing={5} justify="center">
-                                                    {state.job === "freeze" ||
-                                                    state.compressor_sleeptime < config.compressor_sleeptime ||
-                                                    <Grid item>
-                                                        <Button
-                                                            variant="contained"
-                                                            color="primary"
-                                                            onClick={() => {
-                                                                changeJob("freeze")
-                                                            }}
-                                                        >Охлаждение</Button>
-                                                    </Grid>
-                                                    }
-                                                    {state.job === "heat" ||
-                                                    <Grid item>
-                                                        <Button
-                                                            variant="contained"
-                                                            color="secondary"
-                                                            onClick={() => {
-                                                                changeJob("heat")
-                                                            }}
-                                                        >Разморозка</Button>
-                                                    </Grid>
-                                                    }
-                                                    {state.job === "sleep" ||
-                                                    <Grid item>
-                                                        <Button
-                                                            variant="outlined"
-                                                            color="secondary"
-                                                            onClick={() => {
-                                                                changeJob("sleep")
-                                                            }}
-                                                        >Отдых</Button>
-                                                    </Grid>
-                                                    }
-                                                </Grid>
-                                            </div>
-                                        </Grid>
-                                    </Grid>
-                                    }
-                            </Grid>
-                        </Grid>
 
                     </Container>
                 </div>
