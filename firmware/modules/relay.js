@@ -19,7 +19,7 @@ module.exports = function(name, pin, chk) {
         }
     };
 
-    this.on = set(true);
-    this.off = set(false);
+    this.on = set(false);
+    this.off = set(true);
 
 };

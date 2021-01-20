@@ -122,6 +122,8 @@ let compressorFan = new Relay('Compressor Fan', conf.relays.comprFan, (on) => {
 let worker = {
   job: 'off',
 
+  reboot: () => ESP32.reboot(),
+  deep: () => ESP32.deepSleep(10000000),
   sleep:  (force) => compressor.off(force) && heater.off(true),
   heat:   (force) => compressor.off(force) && heater.on(force),
   freeze: (force) => heater.off(force) && compressor.on(force),
@@ -211,10 +213,11 @@ setTimeout(() => worker.run('heat'), 5000);
 //
 //setInterval(worker.loop, conf.job.tLoop * 1000);
 
+//ESP32.enableBLE(false)
 
 // let esp = require('ESP8266');
 // log('Free flash', esp.getFreeFlash());
 // esp.setCPUFreq(160);
-// log('State', esp.getState());
+log('State', ESP32.getState());
 
 

@@ -68,9 +68,8 @@ module.exports = {
                 client.publish(topic, data);
             },
             sub: (topic, handle) => {
-                console.log("dispatcher.tinymqtt>> sub???", topic, connected);
                 if (!connected) return;
-                console.log("dispatcher.tinymqtt>> sub", topic);
+//                console.log("dispatcher.tinymqtt>> sub", topic);
                 client.subscribe(topic);
             }
         });
