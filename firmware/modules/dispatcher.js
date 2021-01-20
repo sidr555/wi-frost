@@ -37,7 +37,7 @@ let Dispatcher = function(name, params) {
     this.sub = (topic, next) => {
         if (typeof params.sub === "function" && typeof next === "function") {
             console.log(name, ">> subscribe topic", topic, typeof next);
-            // params.sub(topic);
+            params.sub(topic);
             lst[topic] = next;
         }
     }

@@ -1,6 +1,6 @@
 // tinyMQTT dispatcher
 module.exports = {
-    create: function(name, params) {
+    create: function(name, params, cb) {
         let host = params.host;
         let connected = false,
             inited = false,
@@ -48,8 +48,15 @@ module.exports = {
                         data.message = JSON.parse(data.message);
                     }
                     // console.log("dispatcher.client handle data", data.topic, data.message);
+                    if (typeof cb.onIn === 'function') {
+                        cb.onIn(data);
+                    }
                     handle(data.topic, data.message);
                 });
+
+                if (typeof cb.onOut === 'function') {
+                    client.on('published', () => cb.onOut());
+                }
 
                 inited = true;
             },
@@ -61,6 +68,7 @@ module.exports = {
                 client.publish(topic, data);
             },
             sub: (topic, handle) => {
+                console.log("dispatcher.tinymqtt>> sub???", topic, connected);
                 if (!connected) return;
                 console.log("dispatcher.tinymqtt>> sub", topic);
                 client.subscribe(topic);
