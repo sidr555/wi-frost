@@ -121,19 +121,38 @@ function App() {
 
             setClient(mqttClient);
 
-            mqtt.sub(globalConfig.location + '/ping', function (data) {
-                mqtt.pub(globalConfig.location + '/pong', 1)
-            });
+            globalConfig.devices.forEach((device) => {
+                mqtt.sub([globalConfig.location, device, 'state'].join('/'), function (data) {
+                    console.log("state >>", data);
+                });
 
-            mqtt.sub(globalConfig.location + '/test', function (data) {
-                console.log("test >>", data);
-            });
+                mqtt.sub([globalConfig.location, device, 'log'].join('/'), function (data) {
+                    console.log("log >>", data);
+                });
 
-            mqtt.sub(globalConfig.location + '/log', function (data) {
-                console.log("log >>", data);
-            });
+                mqtt.sub([globalConfig.location, device, 'temp', 'moroz'].join('/'), function (data) {
+                    console.log("moroz >>", data);
+                });
 
-            mqtt.pub(globalConfig.location + '/log', 'UI connected');
+                mqtt.sub([globalConfig.location, device, 'temp', 'other'].join('/'), function (data) {
+                    console.log("unknown temp >>", data);
+                });
+            });
+//
+//
+//            mqtt.sub(globalConfig.location + '/ping', function (data) {
+//                mqtt.pub(globalConfig.location + '/pong', 1)
+//            });
+//
+//            mqtt.sub(globalConfig.location + '/test', function (data) {
+//                console.log("test >>", data);
+//            });
+//
+//            mqtt.sub(globalConfig.location + '/log', function (data) {
+//                console.log("log >>", data);
+//            });
+//
+//            mqtt.pub(globalConfig.location + '/log', 'UI connected');
         })
     }, []);
 

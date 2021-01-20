@@ -59,7 +59,8 @@ require('Wifi').connect(conf.wifi.ssid, conf.wifi, (err) => {
     disp.connect(() => {
       console.log('MQTT connected: ' + conf.mqtt.host + ':' + conf.mqtt.port);
 
-      disp.pub(topic('state'), [conf.device + ' is ready', new Date()]);
+//      disp.pub(topic('state'), [conf.device + ' is ready', new Date()]);
+      disp.pub(topic('state'), 'start');
 
       disp.sub(topic('run'), (job) => {
         console.log('JOB recieved', job);
@@ -137,10 +138,10 @@ let worker = {
 
       worker.job = job;
       log('worker job started', worker.job, ' compressor:', compressor.act ? '+' : '-', 'heater:', heater.act ? '+' : '-');
-      // ws.send('job', job);
+      disp.pub(topic('state'), job);
 
       if (reason) {
-        // ws.send('log', reason);
+          disp.pub(topic('log'), reason);
       }
     }
   },
@@ -208,8 +209,8 @@ let worker = {
 
 
 // worker.run('start');
-setTimeout(() => worker.run('freeze'), 2000);
-setTimeout(() => worker.run('heat'), 5000);
+setTimeout(() => worker.run('heat'), 2000);
+setTimeout(() => worker.run('freeze'), 5000);
 //
 //setInterval(worker.loop, conf.job.tLoop * 1000);
 

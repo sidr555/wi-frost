@@ -9,7 +9,7 @@ import {
 import StateItem from "../components/StateItem";
 import StateSectionTitle from "../components/StateSectionTitle";
 
-import API from "../Api";
+//import API from "../Api";
 import { niceTimeDiff } from '../helper';
 
 export default function Freezer({ auth, classes }) {
@@ -59,17 +59,17 @@ export default function Freezer({ auth, classes }) {
     };
 
     const changeJob = (job) => {
-        API.get("/setjob/" + job, () => {
-            setState(prevState => {
-                prevState.jobtime = 0;
-                prevState.job = job;
-                return prevState;
-            });
-            // state.jobtime = 0;
-            // state.job = job;
-            // setState(state);
-            console.log("changejob", job, state);
-        });
+//        API.get("/setjob/" + job, () => {
+//            setState(prevState => {
+//                prevState.jobtime = 0;
+//                prevState.job = job;
+//                return prevState;
+//            });
+//            // state.jobtime = 0;
+//            // state.job = job;
+//            // setState(state);
+//            console.log("changejob", job, state);
+//        });
     }
 
     const getFanState = () => {
@@ -82,12 +82,12 @@ export default function Freezer({ auth, classes }) {
     }
 
     useEffect(() => {
-        API.get("/config")
-            .then(response => response.json())
-            .then(config => {
-                setConfig(config)
-                console.log("Config loaded", config);
-            });
+//        API.get("/config")
+//            .then(response => response.json())
+//            .then(config => {
+//                setConfig(config)
+//                console.log("Config loaded", config);
+//            });
 
         // setInterval(() => {
         //     API.get("/state")
