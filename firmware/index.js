@@ -129,6 +129,13 @@ let worker = {
   heat:   (force) => compressor.off(force) && heater.on(force),
   freeze: (force) => heater.off(force) && compressor.on(force),
   start: () => {},
+  state: () => {
+    return {
+        job: worker.job,
+        wifi: true,
+        mqtt: true
+    }
+  },
 
   run: (job, force, reason) => {
     // log('worker run job', job, force);

@@ -16,6 +16,11 @@ let Dispatcher = function(name, params) {
                         }
                     });
 
+                    // subscribe all listeners added before mqtt was connected
+                    if (typeof params.sub === "function") {
+                        Object.keys(lst).forEach((topic) => params.sub(topic, lst[topic]));
+                    }
+
                     if (typeof next === "function") {
                         next(client);
                     }
@@ -35,7 +40,7 @@ let Dispatcher = function(name, params) {
 
     this.sub = (topic, next) => {
         if (typeof params.sub === "function" && typeof next === "function") {
-            console.log(name, ">> subscribe topic", topic, typeof next);
+//            console.log(name, ">> subscribe topic", topic, typeof next);
             params.sub(topic);
             lst[topic] = next;
         }

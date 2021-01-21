@@ -108,13 +108,14 @@ const useStyles = makeStyles((theme) => ({
 function App() {
     const classes = useStyles();
     const [auth, setAuth] = React.useState(true);
+    let mqtt = Dispatcher.create('mqtt', {
+                    host: globalConfig.mqtt.host,
+                    options: globalConfig.mqtt.options
+                });
 
     const [client, setClient] = React.useState({});
     useEffect(() => {
-        let mqtt = Dispatcher.create('mqtt', {
-            host: globalConfig.mqtt.host,
-            options: globalConfig.mqtt.options
-        });
+
 
         mqtt.connect((mqttClient) => {
             console.log("Mqtt connected", mqttClient)
@@ -130,12 +131,12 @@ function App() {
                     console.log("log >>", data);
                 });
 
-                mqtt.sub([globalConfig.location, device, 'temp', 'moroz'].join('/'), function (data) {
-                    console.log("moroz >>", data);
-                });
+//                mqtt.sub([globalConfig.location, device, 'temp', 'moroz'].join('/'), function (data) {
+//                    console.log("moroz >>", data);
+//                });
 
                 mqtt.sub([globalConfig.location, device, 'temp', 'other'].join('/'), function (data) {
-                    console.log("unknown temp >>", data);
+//                    console.log("unknown temp >>", data);
                 });
             });
 //
@@ -184,7 +185,7 @@ function App() {
                 <div className={classes.mainContent}>
                     <Container maxWidth="md">
 
-                        <Freezer classes={classes} auth={auth}/>
+                        <Freezer classes={classes} auth={auth} mqtt={mqtt}/>
 
 
 

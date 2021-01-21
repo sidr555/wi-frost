@@ -1,4 +1,5 @@
 import React, {useEffect} from 'react';
+import { observer } from "mobx-react-lite"
 
 import {
     Button,
@@ -9,10 +10,31 @@ import {
 import StateItem from "../components/StateItem";
 import StateSectionTitle from "../components/StateSectionTitle";
 
+import Unit from "./Unit";
+import TempSensor from './TempSensor'
+
+
 //import API from "../Api";
 import { niceTimeDiff } from '../helper';
 
-export default function Freezer({ auth, classes }) {
+const Freezer = observer(({ auth, mqtt, classes }) => {
+
+
+
+    const moroz = new TempSensor('moroz')
+
+    const unit = new Unit('wi-frost', 's-home', mqtt);
+//    const moroz = unit.addPort();
+
+    useEffect(() => {
+        unit.addPort(moroz)
+    });
+//    const [morozTemp, setMorozTemp] = React.useState({
+//        uptime: 159200,
+//        job: 'none',
+//
+
+
 
     const [state, setState] = React.useState({
         uptime: 159200,
@@ -81,23 +103,7 @@ export default function Freezer({ auth, classes }) {
         return "Работает";
     }
 
-    useEffect(() => {
-//        API.get("/config")
-//            .then(response => response.json())
-//            .then(config => {
-//                setConfig(config)
-//                console.log("Config loaded", config);
-//            });
 
-        // setInterval(() => {
-        //     API.get("/state")
-        //         .then(response => response.json())
-        //         .then(state => {
-        //             setState(state)
-        //             console.log("State loaded", state);
-        //         });
-        // }, 3000);
-    }, []);
 
 
   return (
@@ -123,6 +129,8 @@ export default function Freezer({ auth, classes }) {
             <StateItem key="fan" title="Вентилятор" value={getFanState()} />
 
             <StateSectionTitle title="Датчики"/>
+                <StateItem key={"temp_moroz"} title={temp_sensors.moroz} value={moroz.value}/>
+
                 {Object.keys(config.temp_sensors).map((key, index) => {
                     let temp = " ̊ C";
                     if (state.temperature[key]) {
@@ -185,4 +193,6 @@ export default function Freezer({ auth, classes }) {
         </Grid>
     </Grid>
   </div>);
-}
+})
+
+export default Freezer

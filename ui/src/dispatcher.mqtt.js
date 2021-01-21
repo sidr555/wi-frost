@@ -29,6 +29,7 @@ let mqttdisp = {
                         if (!connected) {
                             connected = true;
                             rectime = 3000;
+
                             if(typeof next === "function") {
                                 next(client);
                             }
@@ -81,7 +82,7 @@ let mqttdisp = {
                 client.publish(topic, data);
             },
             sub: (topic, handle) => {
-//                console.log("dispatcher.mqtt>> sub", topic, connected);
+                console.log("dispatcher.mqtt>> sub", topic, connected);
                 if (!connected) return;
                 client.subscribe(topic);
             }
