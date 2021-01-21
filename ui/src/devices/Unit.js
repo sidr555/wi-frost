@@ -1,10 +1,6 @@
-//import { makeAutoObservable } from "mobx"
-//import { useLocalObservable } from 'mobx-react'
 
 class Unit {
     constructor(name, location, store, mqtt) {
-//        makeAutoObservable(this);
-
         this.store = store
 
         this.mqtt = mqtt;
@@ -19,12 +15,11 @@ class Unit {
     addPort(port) {
         this.store.addPort(port);
         port.setUnit(this)
-        return port
+        return this
     }
 
     getPort(name) {
         return this.store.getPort(name)
-//        return this.store.ports.find((port) => port.name === name)
     }
 }
 

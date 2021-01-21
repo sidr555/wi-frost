@@ -1,4 +1,3 @@
-//import { makeAutoObservable } from "mobx"
 import { makeObservable, observable, computed, action, autorun } from 'mobx'
 
 class UnitStore {
@@ -16,7 +15,7 @@ class UnitStore {
             setValue: action,
             addPort: action,
         });
-       // autorun(() => console.log('Autorun', this.state, this.ports.length, this.values));
+      // autorun(() => console.log('Autorun', this.state, this.ports.length, this.values));
     }
     get values() {
         console.log('UnitStore getValues')

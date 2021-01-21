@@ -1,6 +1,6 @@
 import Port from './Port';
 
-class TempSensor extends Port {
+class Temp1Wire extends Port {
     subscriber = true
     type = 'temp'
     value = 20
@@ -25,4 +25,4 @@ class TempSensor extends Port {
     }
 }
 
-export default TempSensor;
+export default Temp1Wire;

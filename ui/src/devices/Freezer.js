@@ -12,10 +12,8 @@ import StateItem from "../components/StateItem";
 import StateSectionTitle from "../components/StateSectionTitle";
 
 import Unit from "./Unit";
-import TempSensor from './TempSensor'
+import Temp1Wire from './Temp1Wire'
 
-
-//import API from "../Api";
 import { niceTimeDiff } from '../helper';
 
 import UnitStore from '../stores/UnitStore'
@@ -25,19 +23,9 @@ import UnitStore from '../stores/UnitStore'
 const Freezer = observer(({ auth, mqtt, classes }) => {
 
     const freezerStore = new UnitStore()
-
-    const moroz = new TempSensor('moroz')
-
     const unit = new Unit('wi-frost', 's-home', freezerStore, mqtt);
-    unit.addPort(moroz)
-//    const moroz = unit.addPort();
+    unit.addPort(new Temp1Wire('moroz'))
 
-//    useEffect(() => {
-//    });
-//    const [morozTemp, setMorozTemp] = React.useState({
-//        uptime: 159200,
-//        job: 'none',
-//
 
 
 
@@ -52,11 +40,7 @@ const Freezer = observer(({ auth, mqtt, classes }) => {
             unit: null,
             room: null,
             compressor: null
-            // moroz: -16.3,
-            // body: -6.7,
-            // unit: 27.3,
-            // room: 22.8,
-            // compressor: 56.8
+
         },
     });
     const [config, setConfig] = React.useState({
@@ -71,7 +55,7 @@ const Freezer = observer(({ auth, mqtt, classes }) => {
 
 
     const jobs = {
-        none: "Недоступен",
+        wait: "Недоступен",
         sleep: "Сон",
         freeze: "Охлаждение",
         heat: "Разморозка",

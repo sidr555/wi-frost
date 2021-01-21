@@ -1,33 +1,21 @@
-//import { makeAutoObservable } from "mobx"
-//import { makeObservable, observable, action } from "mobx-react-lite"
 
 class Port {
     subscriber: false
-
-    value: 5
-//    type
+    value: null
 
     constructor(name, pin) {
-//        this.value = null
-
-
 
         this.name = name;
         this.pin = pin;
         this.type = 'unknown'
 
-//        makeAutoObservable(this);
-//        makeObservable(this, {
-//            value: observable,
-//            sub:    action
-//        });
     }
 
 
 //    decorate(value) {
 //        return value
 //    }
-//    ba(value) {
+//    beautify(value) {
 //        return value
 //    }
 
@@ -44,10 +32,7 @@ class Port {
                 if (this.parse) {
                     value = this.parse(value)
                 }
-//                value = this.adopt(value);
                 unit.store.setValue(this.name, value)
-//                console.log('sub!', this.topic, value);
-//                this.sub.bind(this));
             })
         }
     }

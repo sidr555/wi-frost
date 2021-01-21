@@ -1,4 +1,4 @@
-//import Unit from 'Unit';
+
 class Switch {
     constructor(unit, name, pin) {
         super(unit, name, pin)
