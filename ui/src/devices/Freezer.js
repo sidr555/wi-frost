@@ -1,5 +1,6 @@
 import React, {useEffect} from 'react';
 import { observer } from "mobx-react-lite"
+//import {observer, inject} from "mobx-react";
 
 import {
     Button,
@@ -17,18 +18,22 @@ import TempSensor from './TempSensor'
 //import API from "../Api";
 import { niceTimeDiff } from '../helper';
 
+import UnitStore from '../stores/UnitStore'
+
+
+
 const Freezer = observer(({ auth, mqtt, classes }) => {
 
-
+    const freezerStore = new UnitStore()
 
     const moroz = new TempSensor('moroz')
 
-    const unit = new Unit('wi-frost', 's-home', mqtt);
+    const unit = new Unit('wi-frost', 's-home', freezerStore, mqtt);
+    unit.addPort(moroz)
 //    const moroz = unit.addPort();
 
-    useEffect(() => {
-        unit.addPort(moroz)
-    });
+//    useEffect(() => {
+//    });
 //    const [morozTemp, setMorozTemp] = React.useState({
 //        uptime: 159200,
 //        job: 'none',
@@ -123,13 +128,13 @@ const Freezer = observer(({ auth, mqtt, classes }) => {
             <StateSectionTitle title="Состояние" />
             <StateItem key="uptime" title="Общее время работы" value={niceTimeDiff(state.start_time)} />
 
-            <StateItem key="job" title="Текущее состояние" value={jobs[state.job]} />
+            <StateItem key="job" title="Текущее состояние" value={jobs[freezerStore.state]} />
 
             <StateItem key="time" title="В течение" value={niceTimeDiff(state.job_time)} />
             <StateItem key="fan" title="Вентилятор" value={getFanState()} />
 
             <StateSectionTitle title="Датчики"/>
-                <StateItem key={"temp_moroz"} title={temp_sensors.moroz} value={moroz.value}/>
+                <StateItem key={"temp_moroz"} title={temp_sensors.moroz} value={freezerStore.values.moroz}/>
 
                 {Object.keys(config.temp_sensors).map((key, index) => {
                     let temp = " ̊ C";

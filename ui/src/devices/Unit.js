@@ -1,42 +1,30 @@
 //import { makeAutoObservable } from "mobx"
-import { useLocalObservable } from 'mobx-react'
-//import UnitStore from 'UnitStore'
+//import { useLocalObservable } from 'mobx-react'
 
 class Unit {
-
-    store = useLocalObservable(() => ({
-        state: 'wait',
-        ports: [],
-        setValue(name, value) {
-            if (name === 'state') {
-                store.state = value
-            } else {
-                let port = store.ports.find( (port) => port.name === name )
-                if (port) {
-                    port.value = value
-                }
-            }
-        }
-    }))
-
-    constructor(name, location, mqtt) {
+    constructor(name, location, store, mqtt) {
 //        makeAutoObservable(this);
+
+        this.store = store
 
         this.mqtt = mqtt;
         this.name = name;
         this.location = location;
-        this.state = 'wait';
-        this.ports = [];
+        this.topic = location + '/' + name
+
+        mqtt.sub([location, name, 'state'].join('/'), (value) => store.setState(value))
+        mqtt.sub([location, name, 'log'].join('/'), (value) => store.addLog(value))
     }
 
     addPort(port) {
-        this.ports.push(port);
+        this.store.addPort(port);
         port.setUnit(this)
         return port
     }
 
     getPort(name) {
-        return this.port.find((port) => port.name === name)
+        return this.store.getPort(name)
+//        return this.store.ports.find((port) => port.name === name)
     }
 }
 

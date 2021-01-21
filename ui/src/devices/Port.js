@@ -2,7 +2,9 @@
 //import { makeObservable, observable, action } from "mobx-react-lite"
 
 class Port {
-    value = 5
+    subscriber: false
+
+    value: 5
 //    type
 
     constructor(name, pin) {
@@ -22,9 +24,12 @@ class Port {
     }
 
 
-    sub(value) {
-        this.value = value
-    }
+//    decorate(value) {
+//        return value
+//    }
+//    ba(value) {
+//        return value
+//    }
 
 
     setUnit(unit) {
@@ -32,8 +37,18 @@ class Port {
         this.mqtt = unit.mqtt;
         this.topic = [unit.location, unit.name, this.type, this.name].join('/')
 
-        if (typeof this.sub === 'function') {
-            this.mqtt.sub(this.topic, this.sub.bind(this));
+        console.log('set unit', this, this.subscriber)
+
+        if (this.subscriber) {
+            this.mqtt.sub(this.topic, (value) => {
+                if (this.parse) {
+                    value = this.parse(value)
+                }
+//                value = this.adopt(value);
+                unit.store.setValue(this.name, value)
+//                console.log('sub!', this.topic, value);
+//                this.sub.bind(this));
+            })
         }
     }
 
