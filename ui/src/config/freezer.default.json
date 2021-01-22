@@ -1,0 +1,62 @@
+{
+  "title": "Большой серый холодильник",
+  "brand": "Daewoo",
+  "model": "FR-530",
+  "image": "/images/daewoo/fr-530.png",
+  "name": "wi-frost",
+  "location": "s-home",
+  "states" : {
+    "wait": "Недоступен",
+    "sleep": "Сон",
+    "freeze": "Охлаждение",
+    "heat": "Разморозка",
+    "danger": "Авария",
+    "unknown": "Неизвестно"
+  },
+  "devs": [
+    {
+      "pin": 4,
+      "type": "onewire",
+      "name": "temp_sensors",
+      "title": "Шина 1-wire"
+    },
+    {
+      "pin": 5,
+      "type": "switch",
+      "name": "compressor",
+      "title": "Компрессор"
+    },
+    {
+      "pin": 18,
+      "type": "switch",
+      "name": "compressor_fan",
+      "title": "Вентилятор компрессора"
+    },
+    {
+      "pin": 19,
+      "type": "switch",
+      "name": "heater",
+      "title": "Отопитель"
+    },
+    {
+      "pin": 21,
+      "type": "switch",
+      "name": "fan",
+      "title": "Вентилятор морозилки"
+    }
+  ],
+  "onewire": [
+    {
+      "id": "284d341104000093",
+      "type": "temp1wire",
+      "name": "moroz",
+      "title": "Морозильная камера"
+    },
+    {
+      "id": "28bf19110400009b",
+      "type": "temp1wire",
+      "name": "body",
+      "title": "Холодильная камера"
+    }
+  ]
+}

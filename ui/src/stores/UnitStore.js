@@ -1,13 +1,13 @@
-import { makeObservable, makeAutoObservable, observable, computed, action, autorun } from 'mobx'
+import { makeAutoObservable } from 'mobx'
 
-const stateTitles = {
-    wait: 'Недоступен',
-    sleep: 'Сон',
-    freeze: 'Охлаждение',
-    heat: 'Разморозка',
-    danger: 'Авария',
-    unknown: 'Неизвестно'
-};
+//const stateTitles = {
+//    wait: 'Недоступен',
+//    sleep: 'Сон',
+//    freeze: 'Охлаждение',
+//    heat: 'Разморозка',
+//    danger: 'Авария',
+//    unknown: 'Неизвестно'
+//};
 
 
 class UnitStore {
@@ -16,33 +16,25 @@ class UnitStore {
     devs = []
     values = {}
     log = []
+    stateTitles = {}
 //    config = {}
 
     constructor() {
         makeAutoObservable(this)
-//        makeObservable(this, {
-//            state: observable,
-//            devs: observable,
-//            log: observable,
-//            values: computed,
-//            currentState: computed,
-//            setState: action,
-//            setValue: action,
-//            addDev: action,
-//        });
-
-//        this.state
-      // autorun(() => console.log('Autorun', this.state, this.devs.length, this.values));
-//      this.config = localStorage.getItem()
     }
     get currentState() {
-        const title = stateTitles[this.state] || stateTitles.unknown
+        const title = this.stateTitles[this.state] || this.stateTitles.unknown || ''
 //        console.log('UnitStore get currentState', this.state, title)
         return {
             state: this.state,
             title
         }
     }
+
+    set states(obj) {
+        this.stateTitles = obj
+    }
+
 //    get values() {
 //        //return {}
 //        const values =  this.devs.reduce((obj, dev) => {
@@ -71,12 +63,6 @@ class UnitStore {
         this.state = value
     }
 
-//    setConfig(data) {
-//        console.log('UnitStore setConfig', data)
-//        this.config = data
-//    }
-
-
     setValue(name, value) {
         let dev = this.devs.find( (dev) => dev.name === name )
 //        console.log('UnitStore setValue', name, value, dev)
@@ -86,7 +72,7 @@ class UnitStore {
             this.values =  this.devs.reduce((obj, dev) => {
                 obj[dev.name] = dev.beautify ? dev.beautify(dev.value) : dev.value
                 return obj
-            }, { state: stateTitles[this.state] });
+            }, { state: this.stateTitles[this.state] });
         }
     }
 }

@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 //import { observer } from "mobx-react-lite"
 import {observer} from "mobx-react-lite";
 
@@ -8,27 +8,24 @@ import {
     Typography
 } from "@material-ui/core";
 
-import StateItem from "../components/StateItem";
-import StateSectionTitle from "../components/StateSectionTitle";
+import StateItem from "./StateItem";
+import StateSectionTitle from "./StateSectionTitle";
 
-import Unit from "./Unit";
-import DallasTemp from './DallasTemp'
+import Unit from "../iot/Unit";
 
-import { niceTimeDiff } from '../helper';
 
-//import UnitStore from '../stores/UnitStore'
+//import { niceTimeDiff } from '../helper';
+
+
 
 
 
 
 const unit = new Unit('wi-frost', 's-home');
-//unit.addDev(new DallasTemp('moroz'))
-//unit.addDev(new DallasTemp('body'))
-//unit.addDev(new DallasTemp('compressor'))
-//unit.addDev(new DallasTemp('room'))
 
-const Freezer = ({ auth, mqtt, classes }) => {
-//    const freezerStore = new UnitStore()
+
+const Freezer = observer(({ auth, mqtt, classes }) => {
+
     unit.useMqtt(mqtt)
 
     const [state, setState] = React.useState({
@@ -78,15 +75,6 @@ const Freezer = ({ auth, mqtt, classes }) => {
 //        });
     }
 
-    const getFanState = () => {
-        if (state.job === "none") {
-            return "-";
-        } else if (state.job === "heat" && state.job_time > 0) {
-            return "Отключен";
-        }
-        return "Работает";
-    }
-
 
 
 
@@ -99,11 +87,17 @@ const Freezer = ({ auth, mqtt, classes }) => {
         align="center"
         color="textPrimary"
         gutterBottom
-    >{config.brand} {config.model}</Typography>
+    >{unit.config.title}</Typography>
+    <Typography
+        variant="h4"
+        align="center"
+        color="textPrimary"
+        gutterBottom
+    >{unit.config.brand} {unit.config.model}</Typography>
 
     <Grid container spacing={2}>
         <Grid item xs={12} sm={4} md={4} lg={4} align="right">
-            <img className={classes.img} alt={config.brand + '' + config.model} src={config.image}/>
+            <img className={classes.img} alt={unit.config.title} src={config.image}/>
         </Grid>
         <Grid item xs={12} sm={8} md={8} lg={8} container alignContent="space-between">
 
@@ -182,6 +176,6 @@ const Freezer = ({ auth, mqtt, classes }) => {
         </Grid>
     </Grid>
   </div>);
-}
+})
 
 export default Freezer
