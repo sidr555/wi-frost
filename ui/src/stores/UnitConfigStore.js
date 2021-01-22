@@ -80,12 +80,13 @@ class UnitConfigStore {
     get onewire() {
         return this.store.onewire
     }
+    get jobs() {
+        return this.store.jobs
+    }
     get devs() {
         return this.store.devs
     }
-//    set devs(value) {
-//        this.store.states = devs
-//    }
+
 
 }
 

@@ -1,29 +1,30 @@
-import React from 'react';
+import React from 'react'
 //import { observer } from 'mobx-react-lite'
-import {observer} from 'mobx-react-lite';
+import {observer} from 'mobx-react-lite'
 
 import {
     Button,
     Grid
-} from '@material-ui/core';
+} from '@material-ui/core'
 
-import StateItem from './StateItem';
-import StateSectionTitle from './StateSectionTitle';
-import UnitTitle from './UnitTitle';
-import UnitImage from './UnitImage';
-
-
-import Unit from '../iot/Unit';
+import StateItem from './StateItem'
+import StateSectionTitle from './StateSectionTitle'
+import UnitTitle from './UnitTitle'
+import UnitImage from './UnitImage'
+import UnitJobs from './UnitJobs'
 
 
-//import { niceTimeDiff } from '../helper';
+import Unit from '../iot/Unit'
 
 
-
+//import { niceTimeDiff } from '../helper'
 
 
 
-const unit = new Unit('wi-frost', 's-home');
+
+
+
+const unit = new Unit('wi-frost', 's-home')
 
 
 const Freezer = observer(({ auth, mqtt, classes }) => {
@@ -43,7 +44,7 @@ const Freezer = observer(({ auth, mqtt, classes }) => {
             compressor: null
 
         },
-    });
+    })
     const [config, setConfig] = React.useState({
         brand: 'Daewoo',
         model: 'FR-530',
@@ -51,7 +52,7 @@ const Freezer = observer(({ auth, mqtt, classes }) => {
         scheme: '',
         instruction: '',
         temp_sensors: {}
-    });
+    })
 
 
 
@@ -59,15 +60,15 @@ const Freezer = observer(({ auth, mqtt, classes }) => {
     const changeJob = (job) => {
 //        API.get('/setjob/' + job, () => {
 //            setState(prevState => {
-//                prevState.jobtime = 0;
-//                prevState.job = job;
-//                return prevState;
-//            });
-//            // state.jobtime = 0;
-//            // state.job = job;
-//            // setState(state);
-//            console.log('changejob', job, state);
-//        });
+//                prevState.jobtime = 0
+//                prevState.job = job
+//                return prevState
+//            })
+//            // state.jobtime = 0
+//            // state.job = job
+//            // setState(state)
+//            console.log('changejob', job, state)
+//        })
     }
 
 
@@ -99,14 +100,27 @@ const Freezer = observer(({ auth, mqtt, classes }) => {
             <StateItem key={'temp_compressor'} title={ unit.devTitles.compressor } unit={ unit } value={ unit.store.values.compressor || '-' }/>
             <StateItem key={'temp_room'} title={ unit.devTitles.room } unit={ unit } value={ unit.store.values.room || '-' }/>
 
+            {auth &&
+                <Grid container>
+                    {/*<StateSectionTitle title='Изменить режим работы'/>*/}
+                    <UnitJobs unit={ unit } classes={ classes } />
+                </Grid>
+            }
+        </Grid>
+    </Grid>
+  </div>)
+})
 
-            {auth && state.job !== 'none' &&
-            <Grid container>
-                <StateSectionTitle title='Изменить режим работы'/>
+export default Freezer
 
+/*
+
+{false &&
                 <Grid item xs={12}>
                     <div className={classes.mainButtons}>
                         <Grid container spacing={5} justify='center'>
+
+
                             {state.job === 'freeze' ||
                             state.compressor_sleeptime < config.compressor_sleeptime ||
                             <Grid item>
@@ -143,12 +157,5 @@ const Freezer = observer(({ auth, mqtt, classes }) => {
                             }
                         </Grid>
                     </div>
-                </Grid>
-            </Grid>
-            }
-        </Grid>
-    </Grid>
-  </div>);
-})
-
-export default Freezer
+                </Grid>}
+                */

@@ -147,8 +147,6 @@ function App() {
 
                         <Freezer classes={classes} auth={auth} mqtt={mqtt}/>
 
-
-
                     </Container>
                 </div>
             </main>

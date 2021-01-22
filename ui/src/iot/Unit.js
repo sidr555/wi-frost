@@ -37,6 +37,7 @@ class Unit {
 //                "freeze": "Холодить",
 //                "heat": "Оттаивать"
 //            }
+//                this.config.store.states.reboot = "Перезагрузка"
 //            this.config.update()
 //       }, 3000);
 
@@ -44,6 +45,28 @@ class Unit {
 
     get devTitles() {
         return this.store.devTitles
+    }
+
+    get jobs() {
+//    console.log("Unit jobs")
+        return Object.keys(this.config.jobs).reduce((arr, name) => {
+            if (name !== this.store.state) {
+                arr.push({
+                    name,
+                    title: this.config.jobs[name]
+                })
+            }
+            return arr
+        }, [])
+    }
+
+    get connected() {
+        return this.mqtt !== null
+    }
+
+    runJob(job) {
+        this.store.setState(job.name)
+        //this.mqtt.pub(this.topic + 'run', job.name)
     }
 
     init(config) {
