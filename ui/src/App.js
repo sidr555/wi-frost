@@ -37,7 +37,7 @@ import AppMenu from "./components/AppMenu";
 
 
 
-import Freezer from "./devices/Freezer";
+import Freezer from "./iot/Freezer";
 
 
 

@@ -1,5 +1,5 @@
 //import Unit from 'Unit';
-class Port {
+class Dev {
     constructor(unit, name, pin) {
         this.unit = unit;
         this.name = name;
@@ -16,4 +16,4 @@ class Port {
 //
 //}
 
-export default Port;
+export default Dev;

@@ -13,25 +13,27 @@ const stateTitles = {
 class UnitStore {
 
     state = 'unknown'
-    ports = []
+    devs = []
     values = {}
     log = []
+//    config = {}
 
     constructor() {
         makeAutoObservable(this)
 //        makeObservable(this, {
 //            state: observable,
-//            ports: observable,
+//            devs: observable,
 //            log: observable,
 //            values: computed,
 //            currentState: computed,
 //            setState: action,
 //            setValue: action,
-//            addPort: action,
+//            addDev: action,
 //        });
 
 //        this.state
-      // autorun(() => console.log('Autorun', this.state, this.ports.length, this.values));
+      // autorun(() => console.log('Autorun', this.state, this.devs.length, this.values));
+//      this.config = localStorage.getItem()
     }
     get currentState() {
         const title = stateTitles[this.state] || stateTitles.unknown
@@ -43,8 +45,8 @@ class UnitStore {
     }
 //    get values() {
 //        //return {}
-//        const values =  this.ports.reduce((obj, port) => {
-//            obj[port.name] = port.beautify ? port.beautify(port.value) : port.value
+//        const values =  this.devs.reduce((obj, dev) => {
+//            obj[dev.name] = dev.beautify ? dev.beautify(dev.value) : dev.value
 //            return obj
 //        }, { state: stateTitles[this.state] });
 //        console.log('UnitStore getValues', values)
@@ -52,12 +54,12 @@ class UnitStore {
 //
 //    }
 
-    getPort(name) {
-        this.ports.find((port) => port.name === name)
-    }
+//    getDev(name) {
+//        this.devs.find((dev) => dev.name === name)
+//    }
 
-    addPort(port) {
-        this.ports.push(port);
+    addDev(dev) {
+        this.devs.push(dev);
     }
 
     addLog(value) {
@@ -69,14 +71,20 @@ class UnitStore {
         this.state = value
     }
 
-    setValue(name, value) {
-        let port = this.ports.find( (port) => port.name === name )
-        console.log('UnitStore setValue', name, value, port)
-        if (port) {
-            port.value = value
+//    setConfig(data) {
+//        console.log('UnitStore setConfig', data)
+//        this.config = data
+//    }
 
-            this.values =  this.ports.reduce((obj, port) => {
-                obj[port.name] = port.beautify ? port.beautify(port.value) : port.value
+
+    setValue(name, value) {
+        let dev = this.devs.find( (dev) => dev.name === name )
+//        console.log('UnitStore setValue', name, value, dev)
+        if (dev) {
+            dev.value = value
+
+            this.values =  this.devs.reduce((obj, dev) => {
+                obj[dev.name] = dev.beautify ? dev.beautify(dev.value) : dev.value
                 return obj
             }, { state: stateTitles[this.state] });
         }

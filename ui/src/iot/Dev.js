@@ -1,13 +1,13 @@
 
-class Port {
+class Dev {
     subscriber: false
     value: null
 
-    constructor(name, pin) {
-
+    constructor({ name, pin, type, title }) {
         this.name = name;
         this.pin = pin;
-        this.type = 'unknown'
+        this.type = type || 'unknown'
+        this.title = title
 
     }
 
@@ -30,4 +30,4 @@ class Port {
 
 }
 
-export default Port;
+export default Dev;

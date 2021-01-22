@@ -12,7 +12,7 @@ import StateItem from "../components/StateItem";
 import StateSectionTitle from "../components/StateSectionTitle";
 
 import Unit from "./Unit";
-import Temp1Wire from './Temp1Wire'
+import DallasTemp from './DallasTemp'
 
 import { niceTimeDiff } from '../helper';
 
@@ -21,15 +21,15 @@ import { niceTimeDiff } from '../helper';
 
 
 
-
+const unit = new Unit('wi-frost', 's-home');
+//unit.addDev(new DallasTemp('moroz'))
+//unit.addDev(new DallasTemp('body'))
+//unit.addDev(new DallasTemp('compressor'))
+//unit.addDev(new DallasTemp('room'))
 
 const Freezer = ({ auth, mqtt, classes }) => {
 //    const freezerStore = new UnitStore()
-    const unit = new Unit('wi-frost', 's-home', mqtt);
-    unit.addPort(new Temp1Wire('moroz'))
-    unit.addPort(new Temp1Wire('body'))
-    unit.addPort(new Temp1Wire('compressor'))
-    unit.addPort(new Temp1Wire('room'))
+    unit.useMqtt(mqtt)
 
     const [state, setState] = React.useState({
         uptime: 159200,
