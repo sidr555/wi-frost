@@ -99,8 +99,10 @@ const useStyles = makeStyles((theme) => ({
 
 
 
-
-
+const mqtt = new Dispatcher('mqtt', {
+    host: globalConfig.mqtt.host,
+    options: globalConfig.mqtt.options
+});
 
 
 
@@ -108,10 +110,7 @@ const useStyles = makeStyles((theme) => ({
 function App() {
     const classes = useStyles();
     const [auth, setAuth] = React.useState(true);
-    let mqtt = Dispatcher.create('mqtt', {
-                    host: globalConfig.mqtt.host,
-                    options: globalConfig.mqtt.options
-                });
+
 
     const [client, setClient] = React.useState({});
     useEffect(() => {
@@ -120,9 +119,6 @@ function App() {
             setClient(mqttClient);
         })
     }, []);
-
-
-
 
 
     return (
@@ -135,8 +131,8 @@ function App() {
                         <Typography variant="h5" align="center" className={classes.title}>Wi-Frost</Typography>
 
                         <IconButton aria-label="MQTT link" color="inherit">
-                            {client.connected && <LinkOn />}
-                            {!client.connected && <LinkOff />}
+                            { client.connected && <LinkOn /> }
+                            { !client.connected && <LinkOff /> }
                         </IconButton>
 
 

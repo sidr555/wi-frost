@@ -4,7 +4,7 @@ import {observer} from "mobx-react-lite"
 
 const StateItem = observer(({title, unit, port, value}) => {
 
-    console.log("update stateitem", title, unit, port)
+//    console.log("update stateitem", title, unit, port)
 
     return (
         <Container>
@@ -17,10 +17,6 @@ const StateItem = observer(({title, unit, port, value}) => {
                 <Grid item xs={6}>
                     <Typography variant="body1" color="textPrimary">
                         {unit && unit.store.values[port]}
-                        |
-                         {unit && unit.store.state}
-
-
                     </Typography>
                 </Grid>
             </Grid>

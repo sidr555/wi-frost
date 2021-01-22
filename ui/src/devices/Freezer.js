@@ -26,7 +26,10 @@ import { niceTimeDiff } from '../helper';
 const Freezer = ({ auth, mqtt, classes }) => {
 //    const freezerStore = new UnitStore()
     const unit = new Unit('wi-frost', 's-home', mqtt);
-//    unit.addPort(new Temp1Wire('moroz'))
+    unit.addPort(new Temp1Wire('moroz'))
+    unit.addPort(new Temp1Wire('body'))
+    unit.addPort(new Temp1Wire('compressor'))
+    unit.addPort(new Temp1Wire('room'))
 
     const [state, setState] = React.useState({
         uptime: 159200,
@@ -103,27 +106,21 @@ const Freezer = ({ auth, mqtt, classes }) => {
             <img className={classes.img} alt={config.brand + '' + config.model} src={config.image}/>
         </Grid>
         <Grid item xs={12} sm={8} md={8} lg={8} container alignContent="space-between">
-            <StateItem key="current_state" title="Текущее состояние" unit={unit} port="state" value={unit.store.currentState.title} />
 
 
-
-
-
-
-
-
-{false && <>
             <StateSectionTitle title="Состояние" />
-            <StateItem key="uptime" title="Общее время работы" value={niceTimeDiff(state.start_time)} />
-
-
-            <StateItem key="time" title="В течение" value={niceTimeDiff(state.job_time)} />
-            <StateItem key="fan" title="Вентилятор" value={getFanState()} />
+            <StateItem key="current_state" title="Текущее состояние" unit={unit} port="state" value={unit.store.currentState.title} />
+            {/*<StateItem key="uptime" title="Общее время работы" value={niceTimeDiff(state.start_time)} />*/}
+            {/*<StateItem key="time" title="В течение" value={niceTimeDiff(state.job_time)} />*/}
+            {/*<StateItem key="fan" title="Вентилятор" value={getFanState()} />*/}
 
             <StateSectionTitle title="Датчики"/>
             <StateItem key={"temp_moroz"} title={temp_sensors.moroz} unit={unit} port="moroz"  value={unit.store.values.moroz}/>
+            <StateItem key={"temp_body"} title={temp_sensors.body} unit={unit} port="body"  value={unit.store.values.body}/>
+            <StateItem key={"temp_compressor"} title={temp_sensors.compressor} unit={unit} port="compressor"  value={unit.store.values.compressor}/>
+            <StateItem key={"temp_room"} title={temp_sensors.room} unit={unit} port="room"  value={unit.store.values.room}/>
 
-            {Object.keys(config.temp_sensors).map((key, index) => {
+{/*            {Object.keys(config.temp_sensors).map((key, index) => {
                 let temp = " ̊ C";
                 if (state.temperature[key]) {
                     temp = state.temperature[key] + temp;
@@ -134,7 +131,7 @@ const Freezer = ({ auth, mqtt, classes }) => {
                     temp = "-";
                 }
                 return <StateItem key={"temp_" + key} title={temp_sensors[key]} value={temp}/>
-            })}
+            })}*/}
 
             {auth && state.job !== "none" &&
             <Grid container>
@@ -182,7 +179,6 @@ const Freezer = ({ auth, mqtt, classes }) => {
                 </Grid>
             </Grid>
             }
-</>}
         </Grid>
     </Grid>
   </div>);

@@ -3,7 +3,7 @@ import Port from './Port';
 class Temp1Wire extends Port {
     subscriber = true
     type = 'temp'
-    value = 20
+    value = null
 
     constructor(name, pin) {
         super(name, pin)
@@ -15,12 +15,15 @@ class Temp1Wire extends Port {
     }
 
     beautify(value) {
+        if (value === null) {
+            return '-'
+        }
         value = parseInt(value*10)/10
         if (value > 0) {
             value = "+" + value;
         }
 
-        console.log("Message for temp sensor", this.name, value)
+//        console.log("Message for temp sensor", this.name, value)
         return value
     }
 }

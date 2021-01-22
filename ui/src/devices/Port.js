@@ -11,21 +11,12 @@ class Port {
 
     }
 
-
-//    decorate(value) {
-//        return value
-//    }
-//    beautify(value) {
-//        return value
-//    }
-
-
     setUnit(unit) {
         this.unit = unit;
         this.mqtt = unit.mqtt;
         this.topic = [unit.location, unit.name, this.type, this.name].join('/')
 
-        console.log('set unit', this, this.subscriber)
+//        console.log('set unit', this, this.subscriber)
 
         if (this.subscriber) {
             this.mqtt.sub(this.topic, (value) => {

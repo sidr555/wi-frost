@@ -11,18 +11,10 @@ class Unit {
         this.location = location;
         this.topic = location + '/' + name
 
-//        setTimeout(() => {
-//            this.store.setState('heat')
-//        },2000)
 
-//this.store.setState('heat')
+        mqtt.sub([location, name, 'state'].join('/'), (value) => this.store.setState(value) )
 
-        mqtt.sub([location, name, 'state'].join('/'), (value) => {
-            console.log('update mqtt state', this.name, value);
-            this.store.setState(value)
-        })
-
-//        mqtt.sub([location, name, 'log'].join('/'), (value) => this.store.addLog(value))
+        mqtt.sub([location, name, 'log'].join('/'), (value) => this.store.addLog(value) )
     }
 
     addPort(port) {
