@@ -1,15 +1,28 @@
+import UnitStore from '../stores/UnitStore'
+//import { observer } from 'mobx-react'
+//import { observable } from 'mobx'
 
 class Unit {
-    constructor(name, location, store, mqtt) {
-        this.store = store
+    constructor(name, location, mqtt) {
+        this.store = new UnitStore()
 
         this.mqtt = mqtt;
         this.name = name;
         this.location = location;
         this.topic = location + '/' + name
 
-        mqtt.sub([location, name, 'state'].join('/'), (value) => store.setState(value))
-        mqtt.sub([location, name, 'log'].join('/'), (value) => store.addLog(value))
+//        setTimeout(() => {
+//            this.store.setState('heat')
+//        },2000)
+
+//this.store.setState('heat')
+
+        mqtt.sub([location, name, 'state'].join('/'), (value) => {
+            console.log('update mqtt state', this.name, value);
+            this.store.setState(value)
+        })
+
+//        mqtt.sub([location, name, 'log'].join('/'), (value) => this.store.addLog(value))
     }
 
     addPort(port) {

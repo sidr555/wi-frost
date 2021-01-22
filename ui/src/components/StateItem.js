@@ -1,7 +1,11 @@
 import React from 'react';
 import {Container, Grid, Typography} from "@material-ui/core";
+import {observer} from "mobx-react-lite"
 
-const StateItem = ({title, value}) => {
+const StateItem = observer(({title, unit, port, value}) => {
+
+    console.log("update stateitem", title, unit, port)
+
     return (
         <Container>
             <Grid container spacing={2}>
@@ -12,13 +16,18 @@ const StateItem = ({title, value}) => {
                 </Grid>
                 <Grid item xs={6}>
                     <Typography variant="body1" color="textPrimary">
-                        {value}
+                        {unit && unit.store.values[port]}
+                        |
+                         {unit && unit.store.state}
+
+
                     </Typography>
                 </Grid>
             </Grid>
 
         </Container>
     )
-}
+})
 
 export default StateItem;
+

@@ -9,7 +9,7 @@ let Dispatcher = function(name, params) {
             params.connect((client) => {
                 if (typeof params.init === "function") {
                     params.init((topic, data) => {
-//                        console.log(name, ">> looking for handler", topic, typeof lst[topic], lst);
+                        console.log(name, ">> looking for handler", topic, typeof lst[topic], lst);
                         if (typeof lst[topic] === "function") {
 //                            console.log(name, ">> run handler", topic);
                             return typeof data === "undefined" ? lst[topic]() : lst[topic](data);

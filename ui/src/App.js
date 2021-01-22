@@ -42,7 +42,8 @@ import Freezer from "./devices/Freezer";
 
 
 import globalConfig from './config';
-import Dispatcher from './dispatcher.mqtt'
+
+import Dispatcher from './dispatcher2'
 
 
 
@@ -135,7 +136,7 @@ function App() {
 
                         <IconButton aria-label="MQTT link" color="inherit">
                             {client.connected && <LinkOn />}
-                            {client.connected || <LinkOff />}
+                            {!client.connected && <LinkOff />}
                         </IconButton>
 
 
