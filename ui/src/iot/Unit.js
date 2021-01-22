@@ -121,6 +121,23 @@ class Unit {
         }
     }
 
+    useMenu(menu) {
+        this.menu = menu
+
+        menu.clean()
+
+        menu.addItem({
+                key: this.topic + '/conf',
+                title: "Настроить " + this.title,
+                click: () => alert("Конфигурация")
+            })
+            .addItem({
+                key: this.topic + '/ins',
+                title: "Инструкция " + this.config.brand + ' ' + this.config.model,
+                click: () => alert("Инструкция")
+            })
+    }
+
     addDev(dev) {
         this.store.addDev(dev);
         this.mqtt && dev.setUnit(this)

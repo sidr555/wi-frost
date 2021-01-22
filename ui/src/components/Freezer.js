@@ -1,11 +1,7 @@
-import React from 'react'
-//import { observer } from 'mobx-react-lite'
-import {observer} from 'mobx-react-lite'
+import React, { useEffect } from 'react'
+import { observer } from 'mobx-react-lite'
 
-import {
-    Button,
-    Grid
-} from '@material-ui/core'
+import { Grid } from '@material-ui/core'
 
 import StateItem from './StateItem'
 import StateSectionTitle from './StateSectionTitle'
@@ -27,56 +23,15 @@ import Unit from '../iot/Unit'
 const unit = new Unit('wi-frost', 's-home')
 
 
-const Freezer = observer(({ auth, mqtt, classes }) => {
+const Freezer = observer(({ auth, mqtt, menu, classes }) => {
 
-    unit.useMqtt(mqtt)
 
-    const [state, setState] = React.useState({
-        uptime: 159200,
-        job: 'none',
-        jobtime: 1243,
-        compressor_sleeptime: 16000,
-        temperature: {
-            moroz: null,
-            body: null,
-            unit: null,
-            room: null,
-            compressor: null
 
-        },
+    useEffect(() => {
+      unit.useMqtt(mqtt)
+      unit.useMenu(menu)
     })
-    const [config, setConfig] = React.useState({
-        brand: 'Daewoo',
-        model: 'FR-530',
-        image: '',
-        scheme: '',
-        instruction: '',
-        temp_sensors: {}
-    })
-
-
-
-
-    const changeJob = (job) => {
-//        API.get('/setjob/' + job, () => {
-//            setState(prevState => {
-//                prevState.jobtime = 0
-//                prevState.job = job
-//                return prevState
-//            })
-//            // state.jobtime = 0
-//            // state.job = job
-//            // setState(state)
-//            console.log('changejob', job, state)
-//        })
-    }
-
-
-
-
-
-
-  return (
+    return (
   <div>
     <UnitTitle unit={ unit } />
     <hr/>
@@ -89,7 +44,7 @@ const Freezer = observer(({ auth, mqtt, classes }) => {
 
 
             <StateSectionTitle title='Состояние' />
-            <StateItem key='current_state' title='Текущее состояние' unit={unit} port='state' value={ unit.store.currentState.title } />
+            <StateItem key='current_state' title='Текущее состояние' unit={unit} value={ unit.store.currentState.title } />
             {/*<StateItem key='uptime' title='Общее время работы' value={niceTimeDiff(state.start_time)} />*/}
             {/*<StateItem key='time' title='В течение' value={niceTimeDiff(state.job_time)} />*/}
             {/*<StateItem key='fan' title='Вентилятор' value={getFanState()} />*/}

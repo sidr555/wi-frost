@@ -45,7 +45,7 @@ import globalConfig from './config';
 
 import Dispatcher from './dispatcher2'
 
-
+import AppMenuStore from './stores/AppMenuStore'
 
 
 const useStyles = makeStyles((theme) => ({
@@ -104,15 +104,14 @@ const mqtt = new Dispatcher('mqtt', {
     options: globalConfig.mqtt.options
 });
 
-
+const appMenuStore = new AppMenuStore()
 
 
 function App() {
     const classes = useStyles();
     const [auth, setAuth] = React.useState(true);
-
-
     const [client, setClient] = React.useState({});
+
     useEffect(() => {
         mqtt.connect((mqttClient) => {
             console.log("Mqtt connected", mqttClient)
@@ -126,7 +125,7 @@ function App() {
             <AppBar position="fixed">
                 <Container fixed>
                     <Toolbar>
-                        <AppMenu instruction={'aaa' /*config.instruction*/}/>
+                        <AppMenu menu={ appMenuStore } />
 
                         <Typography variant="h5" align="center" className={classes.title}>Wi-Frost</Typography>
 
@@ -145,7 +144,7 @@ function App() {
                 <div className={classes.mainContent}>
                     <Container maxWidth="md">
 
-                        <Freezer classes={classes} auth={auth} mqtt={mqtt}/>
+                        <Freezer classes={ classes } auth={ auth } mqtt={ mqtt } menu={ appMenuStore } />
 
                     </Container>
                 </div>

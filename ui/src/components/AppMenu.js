@@ -1,21 +1,16 @@
 import React from 'react';
+import { observer } from 'mobx-react-lite'
 import {
     IconButton,
     Menu,
     MenuItem, //Toolbar
 } from "@material-ui/core";
 //import AccountCircle from "@material-ui/icons/AccountCircle";
+
 import MenuIcon from "@material-ui/icons/Menu";
-//import {makeStyles} from "@material-ui/core/styles";
 
 
-//const useStyles = makeStyles((theme) => ({
-//   a: {
-//       color: theme.text
-//   }
-//}));
-
-function AppMenu({instruction}) {
+export default observer(({ menu }) => {
 //    const classes = useStyles();
     const [anchorEl, setAnchorEl] = React.useState(null);
     const openMenu = (event) => {
@@ -26,10 +21,11 @@ function AppMenu({instruction}) {
         setAnchorEl(null);
     };
 
-    const showInstruction = () => {
-        window.location = instruction;
-    };
+//    const showInstruction = () => {
+//        window.location = instruction;
+//    };
 
+console.log("ITEMS MENU", menu.items, menu);
     return (
         <div>
             <IconButton
@@ -57,11 +53,21 @@ function AppMenu({instruction}) {
                 open={open}
                 onClose={closeMenu}
             >
-                <MenuItem onClick={showInstruction}>
-                    Инструкция по применению
-                </MenuItem>
+                <MenuItem onClick={ () => {
+                    alert(0)
+                } }>Первое</MenuItem>
+
+
+                { menu.items.map( (item) => {
+                    return (
+                        <MenuItem key={ 'app-menu-' + item.key } onClick={ () => {
+                            if (item.click) {
+                                item.click()
+                            }
+                        } }>{ item.title }</MenuItem>
+                    )
+                })}
             </Menu>
         </div>
     );
-}
-export default AppMenu;
+})

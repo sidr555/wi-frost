@@ -1,15 +1,5 @@
 import { makeAutoObservable } from 'mobx'
 
-//const stateTitles = {
-//    wait: 'Недоступен',
-//    sleep: 'Сон',
-//    freeze: 'Охлаждение',
-//    heat: 'Разморозка',
-//    danger: 'Авария',
-//    unknown: 'Неизвестно'
-//};
-
-
 class UnitStore {
 
     state = ''
