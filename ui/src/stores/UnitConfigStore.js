@@ -22,8 +22,10 @@ class UnitConfigStore {
     }
 
     update(data) {
-        this.store = data
-        localStorage.setItem(this.id, JSON.stringify(data))
+        if (data) {
+            this.store = data
+        }
+        localStorage.setItem(this.id, JSON.stringify(this.store))
     }
 
     get title() {
@@ -40,6 +42,20 @@ class UnitConfigStore {
         this.store.name = value
     }
 
+    get brand() {
+        return this.store.brand
+    }
+    set brand(value) {
+        this.store.brand = value
+    }
+
+    get model() {
+        return this.store.model
+    }
+    set model(value) {
+        this.store.model = value
+    }
+
     get location() {
         return this.store.location
     }
@@ -52,6 +68,13 @@ class UnitConfigStore {
     }
     set states(value) {
         this.store.states = value
+    }
+
+    get image() {
+        return this.store.image
+    }
+    set image(value) {
+        this.store.image = value
     }
 
     get onewire() {

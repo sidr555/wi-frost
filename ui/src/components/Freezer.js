@@ -1,17 +1,19 @@
 import React from 'react';
-//import { observer } from "mobx-react-lite"
-import {observer} from "mobx-react-lite";
+//import { observer } from 'mobx-react-lite'
+import {observer} from 'mobx-react-lite';
 
 import {
     Button,
-    Grid,
-    Typography
-} from "@material-ui/core";
+    Grid
+} from '@material-ui/core';
 
-import StateItem from "./StateItem";
-import StateSectionTitle from "./StateSectionTitle";
+import StateItem from './StateItem';
+import StateSectionTitle from './StateSectionTitle';
+import UnitTitle from './UnitTitle';
+import UnitImage from './UnitImage';
 
-import Unit from "../iot/Unit";
+
+import Unit from '../iot/Unit';
 
 
 //import { niceTimeDiff } from '../helper';
@@ -43,26 +45,19 @@ const Freezer = observer(({ auth, mqtt, classes }) => {
         },
     });
     const [config, setConfig] = React.useState({
-        brand: "Daewoo",
-        model: "FR-530",
-        image: "",
-        scheme: "",
-        instruction: "",
+        brand: 'Daewoo',
+        model: 'FR-530',
+        image: '',
+        scheme: '',
+        instruction: '',
         temp_sensors: {}
     });
 
 
 
-    const temp_sensors = {
-        moroz: "Морозильная камера",
-        body: "Холодильная камера",
-        compressor: "Компрессор",
-        unit: "Блок управления",
-        room: "Помещение"
-    };
 
     const changeJob = (job) => {
-//        API.get("/setjob/" + job, () => {
+//        API.get('/setjob/' + job, () => {
 //            setState(prevState => {
 //                prevState.jobtime = 0;
 //                prevState.job = job;
@@ -71,7 +66,7 @@ const Freezer = observer(({ auth, mqtt, classes }) => {
 //            // state.jobtime = 0;
 //            // state.job = job;
 //            // setState(state);
-//            console.log("changejob", job, state);
+//            console.log('changejob', job, state);
 //        });
     }
 
@@ -82,88 +77,66 @@ const Freezer = observer(({ auth, mqtt, classes }) => {
 
   return (
   <div>
-    <Typography
-        variant="h2"
-        align="center"
-        color="textPrimary"
-        gutterBottom
-    >{unit.config.title}</Typography>
-    <Typography
-        variant="h4"
-        align="center"
-        color="textPrimary"
-        gutterBottom
-    >{unit.config.brand} {unit.config.model}</Typography>
+    <UnitTitle unit={ unit } />
+    <hr/>
 
     <Grid container spacing={2}>
-        <Grid item xs={12} sm={4} md={4} lg={4} align="right">
-            <img className={classes.img} alt={unit.config.title} src={config.image}/>
+        <Grid item xs={12} sm={4} md={4} lg={4} align='right'>
+            <UnitImage unit={ unit } />
         </Grid>
-        <Grid item xs={12} sm={8} md={8} lg={8} container alignContent="space-between">
+        <Grid item xs={12} sm={8} md={8} lg={8} container alignContent='space-between'>
 
 
-            <StateSectionTitle title="Состояние" />
-            <StateItem key="current_state" title="Текущее состояние" unit={unit} port="state" value={unit.store.currentState.title} />
-            {/*<StateItem key="uptime" title="Общее время работы" value={niceTimeDiff(state.start_time)} />*/}
-            {/*<StateItem key="time" title="В течение" value={niceTimeDiff(state.job_time)} />*/}
-            {/*<StateItem key="fan" title="Вентилятор" value={getFanState()} />*/}
+            <StateSectionTitle title='Состояние' />
+            <StateItem key='current_state' title='Текущее состояние' unit={unit} port='state' value={ unit.store.currentState.title } />
+            {/*<StateItem key='uptime' title='Общее время работы' value={niceTimeDiff(state.start_time)} />*/}
+            {/*<StateItem key='time' title='В течение' value={niceTimeDiff(state.job_time)} />*/}
+            {/*<StateItem key='fan' title='Вентилятор' value={getFanState()} />*/}
 
-            <StateSectionTitle title="Датчики"/>
-            <StateItem key={"temp_moroz"} title={temp_sensors.moroz} unit={unit} port="moroz"  value={unit.store.values.moroz}/>
-            <StateItem key={"temp_body"} title={temp_sensors.body} unit={unit} port="body"  value={unit.store.values.body}/>
-            <StateItem key={"temp_compressor"} title={temp_sensors.compressor} unit={unit} port="compressor"  value={unit.store.values.compressor}/>
-            <StateItem key={"temp_room"} title={temp_sensors.room} unit={unit} port="room"  value={unit.store.values.room}/>
+            <StateSectionTitle title='Датчики'/>
+            <StateItem key={'temp_moroz'} title={ unit.devTitles.moroz } unit={ unit } port='moroz' value={ unit.store.values.moroz || '-' }/>
+            <StateItem key={'temp_body'} title={ unit.devTitles.body } unit={ unit } port='body'  value={ unit.store.values.body || '-' }/>
+            <StateItem key={'temp_compressor'} title={ unit.devTitles.compressor } unit={ unit } value={ unit.store.values.compressor || '-' }/>
+            <StateItem key={'temp_room'} title={ unit.devTitles.room } unit={ unit } value={ unit.store.values.room || '-' }/>
 
-{/*            {Object.keys(config.temp_sensors).map((key, index) => {
-                let temp = " ̊ C";
-                if (state.temperature[key]) {
-                    temp = state.temperature[key] + temp;
-                    if (state.temperature[key] > 0) {
-                        temp = "+" + temp;
-                    }
-                } else {
-                    temp = "-";
-                }
-                return <StateItem key={"temp_" + key} title={temp_sensors[key]} value={temp}/>
-            })}*/}
 
-            {auth && state.job !== "none" &&
+            {auth && state.job !== 'none' &&
             <Grid container>
-                <StateSectionTitle title="Изменить режим работы"/>
+                <StateSectionTitle title='Изменить режим работы'/>
 
                 <Grid item xs={12}>
                     <div className={classes.mainButtons}>
-                        <Grid container spacing={5} justify="center">
-                            {state.job === "freeze" ||
+                        <Grid container spacing={5} justify='center'>
+                            {state.job === 'freeze' ||
                             state.compressor_sleeptime < config.compressor_sleeptime ||
                             <Grid item>
                                 <Button
-                                    variant="contained"
-                                    color="primary"
+                                    variant='contained'
+                                    color='primary'
                                     onClick={() => {
-                                        changeJob("freeze")
+                                        changeJob('freeze')
                                     }}
                                 >Охлаждение</Button>
                             </Grid>
                             }
-                            {state.job === "heat" ||
+                            {state.job === 'heat' ||
                             <Grid item>
                                 <Button
-                                    variant="contained"
-                                    color="secondary"
+                                    variant='contained'
+                                    color='secondary'
                                     onClick={() => {
-                                        changeJob("heat")
+                                        changeJob('heat')
                                     }}
                                 >Разморозка</Button>
                             </Grid>
                             }
-                            {state.job === "sleep" ||
+                            {state.job === 'sleep' ||
                             <Grid item>
                                 <Button
-                                    variant="outlined"
-                                    color="secondary"
+                                    variant='outlined'
+                                    color='secondary'
                                     onClick={() => {
-                                        changeJob("sleep")
+                                        changeJob('sleep')
                                     }}
                                 >Отдых</Button>
                             </Grid>

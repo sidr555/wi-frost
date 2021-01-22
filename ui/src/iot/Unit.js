@@ -24,14 +24,26 @@ class Unit {
 //            this.config.update(DefaultConfig)
         }
         console.log('unit config', this.config.store)
-       if (this.config.store.name) {
-            this.init(this.config.store)
-       }
+        if (this.config.store.name) {
+             this.init(this.config.store)
+        }
 
-       setTimeout(() => {
-            this.config.title = "Hello"
-       }, 3000);
+//       setTimeout(() => {
+////            this.config.title = 'Холодильник'
+////            this.config.image = 'https://naobzorah.ru/images/pr/380x380/123/122948/38744.jpg'
+//            this.config.store.jobs = {
+//                "reboot": "Рестарт",
+//                "sleep": "Спать",
+//                "freeze": "Холодить",
+//                "heat": "Оттаивать"
+//            }
+//            this.config.update()
+//       }, 3000);
 
+    }
+
+    get devTitles() {
+        return this.store.devTitles
     }
 
     init(config) {

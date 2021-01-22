@@ -12,8 +12,9 @@ import { makeAutoObservable } from 'mobx'
 
 class UnitStore {
 
-    state = 'unknown'
+    state = ''
     devs = []
+    devTitles = {}
     values = {}
     log = []
     stateTitles = {}
@@ -52,6 +53,7 @@ class UnitStore {
 
     addDev(dev) {
         this.devs.push(dev);
+        this.devTitles[dev.name] = dev.title;
     }
 
     addLog(value) {

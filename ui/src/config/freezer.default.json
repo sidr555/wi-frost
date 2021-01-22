@@ -2,7 +2,7 @@
   "title": "Большой серый холодильник",
   "brand": "Daewoo",
   "model": "FR-530",
-  "image": "/images/daewoo/fr-530.png",
+  "image": "https://naobzorah.ru/images/pr/380x380/123/122948/38744.jpg",
   "name": "wi-frost",
   "location": "s-home",
   "states" : {
@@ -12,6 +12,12 @@
     "heat": "Разморозка",
     "danger": "Авария",
     "unknown": "Неизвестно"
+  },
+  "jobs": {
+    "reboot": "Рестарт",
+    "sleep": "Спать",
+    "freeze": "Холодить",
+    "heat": "Оттаивать"
   },
   "devs": [
     {
