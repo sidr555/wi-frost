@@ -11,40 +11,33 @@ import DallasTemp from './DallasTemp'
 class Unit {
     mqtt = null
     constructor(name, location) {
-        console.log('construct new Unit', name)
+//        console.log('construct new Unit', name)
 
         this.name = name;
         this.location = location;
-        this.topic = location + '/' + name + '/'
 
         this.store = new UnitStore()
         this.config = new UnitConfigStore(location + '/' + name)
 
-        if (!this.config.name) {
+//        if (!this.config.name) {
 //            this.config.update(DefaultConfig)
-        }
-        console.log('unit config', this.config.store)
+//        }
+        console.log('unit ' + name + ' config', this.config.store)
         if (this.config.store.name) {
              this.init(this.config.store)
         }
+    }
 
-//       setTimeout(() => {
-////            this.config.title = 'Холодильник'
-////            this.config.image = 'https://naobzorah.ru/images/pr/380x380/123/122948/38744.jpg'
-//            this.config.store.jobs = {
-//                "reboot": "Рестарт",
-//                "sleep": "Спать",
-//                "freeze": "Холодить",
-//                "heat": "Оттаивать"
-//            }
-//                this.config.store.states.reboot = "Перезагрузка"
-//            this.config.update()
-//       }, 3000);
-
+    get topic() {
+        return this.location + '/' + this.name
     }
 
     get devTitles() {
         return this.store.devTitles
+    }
+
+    get tempSensors() {
+        return this.store.devs.filter((item) => item.type === 'temp')
     }
 
     get jobs() {
@@ -66,11 +59,11 @@ class Unit {
 
     runJob(job) {
         this.store.setState(job.name)
-        //this.mqtt.pub(this.topic + 'run', job.name)
+        this.mqtt.pub(this.topic + '/run', job.name)
     }
 
     init(config) {
-        console.log('init config', config.name)
+//        console.log('init config', config.name)
 
         this.store.states = config.states
 
@@ -105,15 +98,15 @@ class Unit {
     useMqtt(mqtt) {
         if (!this.mqtt) {
             this.mqtt = mqtt;
-            mqtt.sub(this.topic + 'state',  (value) => this.store.setState(value) )
-            mqtt.sub(this.topic + 'log',    (value) => this.store.addLog(value) )
-            mqtt.sub(this.topic + 'config', (value) => {
+            mqtt.sub(this.topic + '/state',  (value) => this.store.setState(value) )
+            mqtt.sub(this.topic + '/log',    (value) => this.store.addLog(value) )
+            mqtt.sub(this.topic + '/config', (value) => {
                 console.log('get config', value);
                 //this.saveConfig(value);
     //            this.store.addLog(value)
             })
             if (!this.config) {
-                mqtt.pub(this.topic + 'need_config', null, {wait_connect: true})
+                mqtt.pub(this.topic + '/need_config', null, {wait_connect: true})
                 console.log("Empty conf", this.config);
             }
 

@@ -17,20 +17,15 @@ import Unit from '../iot/Unit'
 
 
 
-
-
-
 const unit = new Unit('wi-frost', 's-home')
 
 
 const Freezer = observer(({ auth, mqtt, menu, classes }) => {
-
-
-
-    useEffect(() => {
       unit.useMqtt(mqtt)
+    useEffect(() => {
+
       unit.useMenu(menu)
-    })
+   })
     return (
   <div>
     <UnitTitle unit={ unit } />
@@ -44,16 +39,21 @@ const Freezer = observer(({ auth, mqtt, menu, classes }) => {
 
 
             <StateSectionTitle title='Состояние' />
-            <StateItem key='current_state' title='Текущее состояние' unit={unit} value={ unit.store.currentState.title } />
+            <StateItem key='current_state' title='Текущее состояние' unit={unit} port='state' value={ unit.store.currentState.title } />
             {/*<StateItem key='uptime' title='Общее время работы' value={niceTimeDiff(state.start_time)} />*/}
             {/*<StateItem key='time' title='В течение' value={niceTimeDiff(state.job_time)} />*/}
             {/*<StateItem key='fan' title='Вентилятор' value={getFanState()} />*/}
 
             <StateSectionTitle title='Датчики'/>
-            <StateItem key={'temp_moroz'} title={ unit.devTitles.moroz } unit={ unit } port='moroz' value={ unit.store.values.moroz || '-' }/>
-            <StateItem key={'temp_body'} title={ unit.devTitles.body } unit={ unit } port='body'  value={ unit.store.values.body || '-' }/>
-            <StateItem key={'temp_compressor'} title={ unit.devTitles.compressor } unit={ unit } value={ unit.store.values.compressor || '-' }/>
-            <StateItem key={'temp_room'} title={ unit.devTitles.room } unit={ unit } value={ unit.store.values.room || '-' }/>
+
+            {
+
+            unit.tempSensors.map((dev) => {
+                //console.log("ITEM", dev.name, unit.devTitles[dev.name]);
+                return (
+                    <StateItem key={'temp_' + dev.name} title={ unit.devTitles[dev.name] } unit={ unit } port={ dev.name } defaultValue='-' />
+                )
+            })}
 
             {auth &&
                 <Grid container>
@@ -67,50 +67,3 @@ const Freezer = observer(({ auth, mqtt, menu, classes }) => {
 })
 
 export default Freezer
-
-/*
-
-{false &&
-                <Grid item xs={12}>
-                    <div className={classes.mainButtons}>
-                        <Grid container spacing={5} justify='center'>
-
-
-                            {state.job === 'freeze' ||
-                            state.compressor_sleeptime < config.compressor_sleeptime ||
-                            <Grid item>
-                                <Button
-                                    variant='contained'
-                                    color='primary'
-                                    onClick={() => {
-                                        changeJob('freeze')
-                                    }}
-                                >Охлаждение</Button>
-                            </Grid>
-                            }
-                            {state.job === 'heat' ||
-                            <Grid item>
-                                <Button
-                                    variant='contained'
-                                    color='secondary'
-                                    onClick={() => {
-                                        changeJob('heat')
-                                    }}
-                                >Разморозка</Button>
-                            </Grid>
-                            }
-                            {state.job === 'sleep' ||
-                            <Grid item>
-                                <Button
-                                    variant='outlined'
-                                    color='secondary'
-                                    onClick={() => {
-                                        changeJob('sleep')
-                                    }}
-                                >Отдых</Button>
-                            </Grid>
-                            }
-                        </Grid>
-                    </div>
-                </Grid>}
-                */

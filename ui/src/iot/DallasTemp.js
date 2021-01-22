@@ -11,6 +11,10 @@ class DallasTemp extends Dev {
 //        console.log("Construct temp sensor", name, pin)
     }
 
+    get topic() {
+        return this.unit ? [this.unit.topic, this.type, this.name.substring(5)].join('/') : ''
+    }
+
     parse(value) {
         return value[0]
     }

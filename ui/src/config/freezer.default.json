@@ -55,14 +55,14 @@
   "onewire": [
     {
       "id": "284d341104000093",
-      "type": "temp1wire",
-      "name": "moroz",
+      "type": "temp_dallas",
+      "name": "temp_moroz",
       "title": "Морозильная камера"
     },
     {
       "id": "28bf19110400009b",
-      "type": "temp1wire",
-      "name": "body",
+      "type": "temp_dallas",
+      "name": "temp_body",
       "title": "Холодильная камера"
     }
   ]

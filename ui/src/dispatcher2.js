@@ -10,13 +10,13 @@ class Dispatcher {
     client = null
 
     constructor (name, params) {
-        console.log(name, ">> create new dispatcher")
+//        console.log(name, ">> create new dispatcher")
         this.name = name
         this.params = params
     }
 
     connect(next) {
-        console.log("dispatcher.mqtt>> connect", this.isConnected, typeof next)
+//        console.log("dispatcher.mqtt>> connect", this.isConnected, typeof next)
         if (!this.isConnected) {
             this.client = mqtt.connect(this.params.host, this.params.options);
 

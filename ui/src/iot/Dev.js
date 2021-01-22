@@ -11,10 +11,13 @@ class Dev {
 
     }
 
+    get topic() {
+        return this.unit ? [this.unit.topic, this.type, this.name].join('/') : ''
+    }
+
     setUnit(unit) {
         this.unit = unit;
         this.mqtt = unit.mqtt;
-        this.topic = [unit.location, unit.name, this.type, this.name].join('/')
 
 //        console.log('set unit', this, this.subscriber)
 

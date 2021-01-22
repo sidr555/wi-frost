@@ -25,7 +25,7 @@ export default observer(({ menu }) => {
 //        window.location = instruction;
 //    };
 
-console.log("ITEMS MENU", menu.items, menu);
+//console.log("ITEMS MENU", menu.items, menu);
     return (
         <div>
             <IconButton

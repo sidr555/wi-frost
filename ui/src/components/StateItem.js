@@ -2,7 +2,7 @@ import React from 'react';
 import {Container, Grid, Typography} from "@material-ui/core";
 import {observer} from "mobx-react-lite"
 
-const StateItem = observer(({title, unit, port, value}) => {
+const StateItem = observer(({title, unit, port, defaultValue }) => {
 
 //    console.log("update stateitem", title, unit, port)
 
@@ -16,7 +16,7 @@ const StateItem = observer(({title, unit, port, value}) => {
                 </Grid>
                 <Grid item xs={6}>
                     <Typography variant="body1" color="textPrimary">
-                        {unit && unit.store.values[port]}
+                        {unit && unit.store.values[port] /*|| defaultValue*/}
                     </Typography>
                 </Grid>
             </Grid>

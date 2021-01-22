@@ -1,8 +1,6 @@
 import { makeAutoObservable } from 'mobx'
 
 
-
-
 class AppMenuStore {
     items = []
 
@@ -15,7 +13,7 @@ class AppMenuStore {
     }
 
     addItem(item) {
-        console.log('MENU add item', item, this.items);
+//        console.log('MENU add item', item, this.items);
         this.items.push(item)
         return this
     }

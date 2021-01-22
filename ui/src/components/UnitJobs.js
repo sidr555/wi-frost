@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite"
 import { Button, Grid } from '@material-ui/core'
 
 export default observer(({ unit, classes }) => {
-    console.log('UnitJobs', unit.jobs)
+//    console.log('UnitJobs', unit.jobs)
 
     return (
         <Grid item xs={12}>
