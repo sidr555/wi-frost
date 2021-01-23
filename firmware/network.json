@@ -2,12 +2,25 @@
     "wifi": {
         "ssid": "Keenetic-0186",
         "password": "R838rPfr",
-        "time_check": 30
+        "time_check": 10
     },
-    "mqtt": {
+    "tinymqtt": {
         "host": "maxdrv.ru",
         "port": 1883,
         "username": "wuser",
         "password": "wuserp"
+    },
+    "mqtt": {
+        "host": "maxdrv.ru",
+        "options": {
+            "client_id": "random1",
+            "keep_alive": 60,
+            "port": 1883,
+            "clean_session": true,
+            "username": "wuser",
+            "password": "wuserp",
+            "protocol_name": "MQTT",
+            "protocol_level": 4
+        }
     }
 }

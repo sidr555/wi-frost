@@ -71,13 +71,13 @@ if (!netconf) {
     log("1-wire IDs", devs.onewire.ids);
     // log("Dallas temp sensors", dallasTemp);
 
-
+    const Dispatcher = require('dispatcher.mqtt');
+    const mqtt = new Dispatcher(unitconf.name, netconf.mqtt);
+    // const mqtt = require('dispatcher.mqtt').create(unitconf.name, netconf.mqtt, {
+    //         onIn: () => blink(2, 50),
+    //         onOut: () => blink(1, 150),
+    //     });
     // Set MQTT dispatcher
-    const disp = require('dispatcher.tinymqtt')
-        .create(unitconf.name, netconf.mqtt, {
-            onIn: () => blink(2, 50),
-            onOut: () => blink(1, 150),
-        });
 
     const topic = (name) => [unitconf.location, unitconf.name, name].join('/');
     // let tempMap = {
@@ -99,41 +99,52 @@ if (!netconf) {
 
     // Connect Wifi
     const connectWiFi = () => {
-        console.log('WiFi connecting ' + netconf.wifi.ssid + ' ...');
+        log('WiFi connecting ' + netconf.wifi.ssid + ' ...');
 
         Wifi.connect(netconf.wifi.ssid, netconf.wifi, (err) => {
             if (err) {
-                console.log('WiFi connect error: ' + err);
+                log('WiFi connect error: ' + err);
                 return;
             }
 
-            console.log('WiFi successfully connected!');
+            log('WiFi successfully connected!');
 
             // Connect MQTT
-            console.log('MQTT connecting ' + netconf.mqtt.host + ':' + netconf.mqtt.port + ' ...');
+            log('MQTT connecting ' + netconf.mqtt.host + ':' + netconf.mqtt.options.port + ' ...');
 
-            disp.connect(() => {
-                console.log('MQTT successfully connected!');
+            mqtt.connect(() => {
+                log('MQTT successfully connected!');
 
-                //      disp.pub(topic('state'), [unitconf.name + ' is ready', new Date()]);
-                disp.pub(topic('state'), 'start');
+                mqtt.client.on('message', () => blink(2, 50));
+                mqtt.client.on('publish', () => blink(1, 150));
 
-                disp.sub(topic('run'), (job) => {
-                    console.log('JOB recieved', job);
+
+                //      mqtt.pub(topic('state'), [unitconf.name + ' is ready', new Date()]);
+                mqtt.pub(topic('state'), 'start');
+
+                mqtt.sub(topic('run'), (job) => {
+                    log('JOB recieved', job);
                     worker.run(job, true, 'from mqtt');
                 });
 
-                disp.sub(topic('test'), function(data) {
+                mqtt.sub(topic('need_conf'), () => {
+                    log('unitconf request recieved');
+
+                    mqtt.pub(topic('unitconf'), unitconf);
+                    mqtt.pub(topic('jobconf'), jobconf);
+                });
+
+                mqtt.sub(topic('test'), function(data) {
                     log('recieved MQTT', data);
                 });
 
                 if (devs.onewire && devs.onewire.dallasTemps && unitconf.onewire.send_time) {
                     // Periodically sends temperature to server
                     setInterval(() => {
-                        // console.log('Send temps', dallasTemp);
+                        // log('Send temps', dallasTemp);
                         dallasTemp.forEach((item) => {
                             if (item.name) {
-                                disp.pub(topic('temp/' + item.name), item.temp);
+                                mqtt.pub(topic('temp/' + item.name), item.temp);
                             }
                         });
                     }, unitconf.onewire.send_time * 1000);
@@ -155,16 +166,6 @@ if (!netconf) {
 
     // Check WiFi and reconnect on lost connection
     setInterval(() => {
-        log("Check Wifi status", ESP32.getState());
-        Wifi.getStatus((status) => {
-            log("Wifi status", status);
-            //        if (status.station === "connected") {
-            //            log('Wifi status: connected');
-            //        } else {
-            //            connect();
-            //        }
-        });
-
         if (!wifion) {
             connectWiFi();
         }
