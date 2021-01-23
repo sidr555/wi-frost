@@ -1,5 +1,6 @@
 import { makeAutoObservable } from 'mobx'
 
+import DefaultConfig from '../config/freezer.default.json'
 
 class UnitConfigStore {
 
@@ -11,13 +12,20 @@ class UnitConfigStore {
 
         this.id = id
 
-        const store = localStorage.getItem(id)
-        if (store) {
+        const store = ''//localStorage.getItem(id)
+        if (store && store.name) {
             try {
                 this.store = JSON.parse(store)
             } catch (e) {
             }
+        } else {
+            this.fetch()
+        }
+    }
 
+    fetch() {
+        if (!this.store.name) {
+            this.store = DefaultConfig
         }
     }
 
@@ -25,7 +33,7 @@ class UnitConfigStore {
         if (data) {
             this.store = data
         }
-        localStorage.setItem(this.id, JSON.stringify(this.store))
+//        localStorage.setItem(this.id, JSON.stringify(this.store))
     }
 
     get title() {

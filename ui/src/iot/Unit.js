@@ -6,7 +6,7 @@ import Switch from './Switch'
 import Button from './Button'
 import DallasTemp from './DallasTemp'
 
-//import DefaultConfig from '../config/freezer.default.json'
+
 
 class Unit {
     mqtt = null
@@ -19,9 +19,7 @@ class Unit {
         this.store = new UnitStore()
         this.config = new UnitConfigStore(location + '/' + name)
 
-//        if (!this.config.name) {
-//            this.config.update(DefaultConfig)
-//        }
+
         console.log('unit ' + name + ' config', this.config.store)
         if (this.config.store.name) {
              this.init(this.config.store)
