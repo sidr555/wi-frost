@@ -1,7 +1,14 @@
 const Wifi = require('Wifi');
 const storage = require("Storage");
-//const conf = require('config');
+const RelayPort = require('relay');
+const OneWirePort = require('1wire');
+
 let log = console.log;
+
+const err_blinks = {
+    badconf: 5,
+    wifidis: 4
+};
 
 // Blue led blinking routine
 const blink = (num, delay) => {
@@ -19,13 +26,13 @@ const netconf = storage.readJSON("network.json");
 const unitconf = storage.readJSON("unit.json");
 const jobconf = storage.readJSON("job.json");
 
-log("network.json", netconf);
+//log("network.json", netconf);
 //log("unit.json", unitconf);
 //log("job.json", jobconf);
 
 if (!netconf) {
     log("No WiFi configuration found. Please create it in the storage with the name network.json");
-    blink(5, 500);
+    blink(err_blinks.badconf, 500);
 } else {
 
     if (!unitconf) {
@@ -36,37 +43,33 @@ if (!netconf) {
         });
     }
 
-    const devs = unitconf.devs.map((dev) => {
+    const devs = unitconf.devs.reduce((devs, dev) => {
+        switch (dev.type) {
+            case 'relay':
+                log("Initialize new Relay " + dev.name + ' on port ' + dev.pin);
+                devs[dev.name] = new RelayPort(dev, ()=>1);
+                if (dev.default) {
+                    devs[dev.name].on();
+                } else {
+                    devs[dev.name].off();
+                }
+                break;
+            case 'onewire':
+                log("Initialize new 1-wire bus on port " + dev.pin);
+                devs[dev.name] = new OneWirePort(dev, unitconf.onewire);
+                break;
+            default:
+                log("Ignore unknown dev type: " + dev.type);
+        }
+        return devs;
+    }, {});
 
-    });
+    log("Unit devices", Object.keys(devs));
 
 
-
-    let dallasSensors = [];
-    if (unitconf.onewire) {
-        log("Initialize OneWire", unitconf.onewire);
-
-        // Initialize DS18B20 temperature sensors and send statistics via WebSockets
-        const ow = new OneWire(unitconf.onewire.pin);
-        dallasSensors = ow.search().map(function (id) {
-          let dev = require('DS18B20').connect(ow, id);
-
-          let obj = {
-            id: id,
-            dev: dev,
-            check: () => {
-              dev.getTemp((temp) => {
-                obj.temp = temp;
-        //        log('Check temp', id, temp);
-              });
-            }
-          };
-          obj.check();
-          setInterval(obj.check, unitconf.onewire.tCheck * 1000);
-          return obj;
-        }, {});
-    }
-
+    const dallasTemps = devs.onewire ? devs.onewire.dallasTemps : [];
+    log("1-wire IDs", devs.onewire.ids);
+    // log("Dallas temp sensors", dallasTemp);
 
 
     // Set MQTT dispatcher
@@ -77,22 +80,29 @@ if (!netconf) {
         });
 
     const topic = (name) => [unitconf.location, unitconf.name, name].join('/');
-    let tempMap = {
-      '284d341104000093': 'moroz',
-      '28bf19110400009b': 'body'
-    };
+    // let tempMap = {
+    //   '284d341104000093': 'moroz',
+    //   '28bf19110400009b': 'body'
+    // };
 
 
-    Wifi.on('connected', (details) => log("WiFi connected!", details));
-    Wifi.on('disconnected', (details) => log("WiFi disconnected!", details));
-
+    let wifion = false;
+    Wifi.on('connected', (details) => {
+        log("WiFi connected!", details);
+        wifion = true;
+    });
+    Wifi.on('disconnected', (details) => {
+        blink(err_blinks.wifidis, 500);
+        log("WiFi disconnected!", details);
+        wifion = false;
+    });
 
     // Connect Wifi
     const connectWiFi = () => {
         console.log('WiFi connecting ' + netconf.wifi.ssid + ' ...');
 
         Wifi.connect(netconf.wifi.ssid, netconf.wifi, (err) => {
-            if (!err) {
+            if (err) {
                 console.log('WiFi connect error: ' + err);
                 return;
             }
@@ -105,7 +115,7 @@ if (!netconf) {
             disp.connect(() => {
                 console.log('MQTT successfully connected!');
 
-        //      disp.pub(topic('state'), [unitconf.name + ' is ready', new Date()]);
+                //      disp.pub(topic('state'), [unitconf.name + ' is ready', new Date()]);
                 disp.pub(topic('state'), 'start');
 
                 disp.sub(topic('run'), (job) => {
@@ -117,22 +127,15 @@ if (!netconf) {
                     log('recieved MQTT', data);
                 });
 
-                if (dallasSensors.letgth && unitconf.onewire.send_time) {
+                if (devs.onewire && devs.onewire.dallasTemps && unitconf.onewire.send_time) {
                     // Periodically sends temperature to server
                     setInterval(() => {
-                        // console.log('Send temps', dallasSensors);
-                        dallasSensors.forEach((obj) => {
-                            if (obj.temp) {
-                                if (tempMap[obj.id]) {
-                                    disp.pub(topic('temp/' + tempMap[obj.id]), [obj.temp]);
-        //                  console.log('send wi-frost/temp/' + tempMap[obj.id], obj.id, obj.temp);
-                                } else {
-                                    disp.pub(topic('temp/other'), [obj.id, obj.temp]);
-        //                  console.log('send wi-frost/temp/other', [obj.id, obj.temp]);
-                                }
+                        // console.log('Send temps', dallasTemp);
+                        dallasTemp.forEach((item) => {
+                            if (item.name) {
+                                disp.pub(topic('temp/' + item.name), item.temp);
                             }
                         });
-                        // disp.pub('wi-frost/temp', temp);
                     }, unitconf.onewire.send_time * 1000);
                 }
             });
@@ -146,160 +149,30 @@ if (!netconf) {
             connectWiFi();
         });
     } else {
-            // Todo setup WiFi AP
-            connectWiFi();
+        // Todo setup WiFi AP
+        connectWiFi();
     }
 
     // Check WiFi and reconnect on lost connection
     setInterval(() => {
-        log("Check Wifi status");
+        log("Check Wifi status", ESP32.getState());
         Wifi.getStatus((status) => {
             log("Wifi status", status);
-    //        if (status.station === "connected") {
-    //            log('Wifi status: connected');
-    //        } else {
-    //            connect();
-    //        }
+            //        if (status.station === "connected") {
+            //            log('Wifi status: connected');
+            //        } else {
+            //            connect();
+            //        }
         });
-    }, netconf.wifi.check_time * 1000);
+
+        if (!wifion) {
+            connectWiFi();
+        }
+    }, netconf.wifi.time_check * 1000);
 
 
 }
 
 
-
-
-/*
-const now = require('now').Now;
-const secFrom = require('now').Sec;
-const Relay = require('relay');
-
-const compressor = new Relay('Compressor', unitconf.relays.compr, (on) => {
-  return true;
-  // return !on || secFrom(this.time) > jobconf.lims.compr_sleeptime
-});
-
-const heater = new Relay('Heater', unitconf.relays.heater, (on) => {
-  return true;
-  // return on || secFrom(this.time) > jobconf.lims.heater_stop_minutes
-});
-
-const compressorFan = new Relay('Compressor Fan', unitconf.relays.comprFan, (on) => {
-  return true;
-  // return !on || secFrom(this.time) > jobconf.lims.compr_sleeptime
-});
-
-
-
-const worker = {
-  job: 'off',
-
-  reboot: () => ESP32.reboot(),
-  deep: () => ESP32.deepSleep(10000000),
-  sleep:  (force) => compressor.off(force) && heater.off(true),
-  heat:   (force) => compressor.off(force) && heater.on(force),
-  freeze: (force) => heater.off(force) && compressor.on(force),
-  start: () => {},
-  state: () => {
-    return {
-        job: worker.job,
-        wifi: true,
-        mqtt: true
-    };
-  },
-
-  run: (job, force, reason) => {
-    // log('worker run job', job, force);
-    if (job !== worker.job &&
-        typeof worker[job] === 'function' &&
-        worker[job](force)) {
-
-      worker.job = job;
-      log('worker job started', worker.job, ' compressor:', compressor.act ? '+' : '-', 'heater:', heater.act ? '+' : '-');
-      disp.pub(topic('state'), job);
-
-      if (reason) {
-          disp.pub(topic('log'), reason);
-      }
-    }
-  },
-
-  loop: () => {
-    if (!jobconf.lims) return;
-
-    let time = now(),
-        hour = (new Date()).getHours(),
-        // temp = Object.keys(unitconf.sensors).reduce((obj, key) => {
-        //   // console.log('temp', key, unitconf.sensors[key], sensors[unitconf.sensors[key]]);
-        //   obj[key] = sensors[unitconf.sensors[key]] ? sensors[unitconf.sensors[key]].temp : false;
-        //   return obj;
-        // }, {});
-        temp = {};
-
-    log('JOB LOOP', worker.job, hour, temp);
-
-    // Start heater on time
-    if (worker.job !== 'heat' && hour === jobconf.lims.heater_start_hour) {
-      // log('START HEATER ON TIME')
-      return worker.run('heat', false, ['heater_start_hour', hour]);
-    }
-
-    // Stop heater on time
-    if (worker.job === 'heat' && secFrom(this.heater.time) > jobconf.lims.heater_stop_minutes * 60) {
-      // log('STOP HEATER ON TIME')
-      return worker.run('sleep', false,['heater_stop_minutes', hour]);
-    }
-
-    // Stop freezing on moroz temp < stop temp
-    if (worker.job === 'freeze' && temp.moroz && temp.moroz < jobconf.lims.moroz_stop_temp) {
-      // log('STOP COMPRESSOR (GOOD MOROZ)')
-      return worker.run('sleep', ['moroz_stop_temp', temp.moroz]);
-    }
-
-    // Start freezing on moroz temp > start temp
-    if (worker.job !== 'freeze' &&
-        temp.moroz && temp.moroz > jobconf.lims.moroz_start_temp) {
-      // log('START COMPRESSOR (LOW MOROZ)')
-      return worker.run('freeze', ['moroz_start_temp', temp.moroz]);
-    }
-
-    // Stop freezing on compressor temp > max temp
-    if (worker.job === 'freeze' &&
-        temp.compr && temp.compr > jobconf.lims.compr_max_temp) {
-      // log('STOP COMPRESSOR (HIGH TEMP)')
-      return worker.run('sleep', ['compr_max_temp', temp.compr]);
-    }
-
-    // Warn on unit temp > max temp
-    if (temp.unit && temp.unit > jobconf.lims.unit_max_temp) {
-      // log('HIGH UNIT TEMP')
-      // ws.send('warn', ['unit_max_temp', temp.unit]);
-    }
-
-    // Start heater on delta temp
-    if (worker.job !== 'heat' &&
-        temp.body - temp.moroz > jobconf.lims.delta_temp) {
-      // log('START HEATER (GOOD MOROZ AND LOW BODY TEMP)')
-      return worker.run('heat', ['delta_temp', temp.moroz, temp.body]);
-    }
-  }
-};
-
-
-// worker.run('start');
-setTimeout(() => worker.run('heat'), 2000);
-setTimeout(() => worker.run('freeze'), 5000);
-//
-//setInterval(worker.loop, jobconf.loop_time * 1000);
-
-*/
-
-
-
-//ESP32.enableBLE(false)
-
-// let esp = require('ESP8266');
-// log('Free flash', esp.getFreeFlash());
-// esp.setCPUFreq(160);
-log('State', ESP32.getState());
+// log('State', ESP32.getState());
 

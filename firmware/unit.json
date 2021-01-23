@@ -24,34 +24,34 @@
     {
       "pin": 4,
       "type": "onewire",
-      "name": "temp_sensors",
+      "name": "onewire",
       "title": "Шина 1-wire",
       "time_check": 10
     },
     {
       "pin": 5,
-      "type": "switch",
+      "type": "relay",
       "name": "compressor",
       "title": "Компрессор",
       "default": 1
     },
     {
       "pin": 18,
-      "type": "switch",
+      "type": "relay",
       "name": "compressor_fan",
       "title": "Вентилятор компрессора",
       "default": 1
     },
     {
       "pin": 19,
-      "type": "switch",
+      "type": "relay",
       "name": "heater",
       "title": "Отопитель",
       "default": 0
     },
     {
       "pin": 21,
-      "type": "switch",
+      "type": "relay",
       "name": "fan",
       "title": "Вентилятор морозилки",
       "default": 1
