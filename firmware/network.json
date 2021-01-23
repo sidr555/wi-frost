@@ -1,0 +1,13 @@
+{
+    "wifi": {
+        "ssid": "Keenetic-0186",
+        "password": "R838rPfr",
+        "check_time": 30
+    },
+    "mqtt": {
+        "host": "maxdrv.ru",
+        "port": 1883,
+        "username": "wuser",
+        "password": "wuserp"
+    }
+}

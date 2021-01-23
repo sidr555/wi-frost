@@ -1,0 +1,15 @@
+{
+    "name": "wi-frost",
+    "location": "s-home",
+    "onewire": {
+        "pin": 4,
+        "check_time": 2,
+        "send_time": 5
+    },
+    "relays": {
+        "compr": 5,
+        "comprFan": 18,
+        "heater": 19,
+        "fan": 21
+    }
+}
