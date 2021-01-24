@@ -1,71 +1,101 @@
-{
-    "jobs": [
-        {
-            "name": "Запуск компрессора при нагреве морозилки",
-            "actions": [{
-                "dev": "compressor",
-                "value": true
-            }],
-            "conditions": [
-                "@temp_moroz > -12",
-                "@heater = 0"
-            ],
-            "limits": {
-                "minTime": "30m",
-                "maxTime": "2h",
-                "minRest": "30m"
-            }
-        }, {
-            "name": "Остановка компрессора при охлаждении морозилки",
-            "actions": [{
-                "dev": "compressor",
-                "value": false
-            },{
-                "dev": "compressor_fan",
-                "value": true
-            }],
-            "conditions": [
-                "@temp_moroz < -18"
-            ],
-            "limits": {
-            }
-        }, {
-            "name": "Остановка вентиля компрессора через 15 минут",
-            "actions": [{
-                "dev": "compressor_fan",
-                "value": false
-            }],
-            "conditions": [
-                "@compressor rest 15m"
-            ]
-        }, {
-            "name": "Включение ТЭН ночью",
-            "actions": [{
-                "dev": "compressor",
-                "value": false
-            }, {
-                "dev": "heater",
-                "value": true
-            }],
-            "conditions": [
-                "#clock >= 4h",
-                "#clock < 7h"
-            ],
-            "limits": {
-                "minTime": "2h"
-            }
-        },{
-            "name": "Тревога при холодной морозилке и теплом холодильнике",
-            "actions": [{
-                "dev": "!alert",
-                "value": "В морозилке холодно,в холодильнике тепло"
-            }],
-            "conditions": [
-                "@temp_moroz < -15",
-                "@temp_body > -5"
-            ]
+[
+    {
+        "name": "Ручной запуск компрессора",
+        "conditions": [
+            "^freeze"
+        ],
+        "actions": {
+            "compressor": true,
+            "heater": false
+        },
+        "force": true
+    },
+    {
+        "name": "Ручной запуск отопителя",
+        "conditions": [
+            "^heat"
+        ],
+        "actions": {
+            "compressor": false,
+            "heater": true
+        },
+        "force": true
+    },
+    {
+        "name": "Спящий режим",
+        "conditions": [
+            "^sleep"
+        ],
+        "actions": {
+            "compressor": false,
+            "compressor_fan": false,
+            "heater": false
+        },
+        "limits": {
+            "minTime": "1h"
+        },
+        "force": true
+    },
+    {
+        "name": "Запуск компрессора при нагреве морозилки",
+        "conditions": [
+            "@temp_moroz > -12",
+            "@heater = 0"
+        ],
+        "actions": {
+            "compressor": true
+        },
+        "limits": {
+            "minTime": "30m",
+            "maxTime": "2h",
+            "minRest": "30m"
         }
-
-    ],
-    "time_loop": 2
-}
+    },
+    {
+        "name": "Остановка компрессора при охлаждении морозилки",
+        "conditions": [
+            "@temp_moroz < -18"
+        ],
+        "actions": {
+            "compressor": false,
+            "compressor_fan": true
+        },
+        "limits": {
+        }
+    },
+    {
+        "name": "Остановка вентиля компрессора через 15 минут",
+        "conditions": [
+            "@compressor rest 15m"
+        ],
+        "actions": {
+            "compressor_fan": false
+        }
+    },
+    {
+        "name": "Включение отопителя ночью",
+        "conditions": [
+            "#clock >= 4h",
+            "#clock < 7h"
+        ],
+        "actions": {
+            "compressor": false,
+            "heater": true
+        },
+        "limits": {
+            "minTime": "2h"
+        }
+    },
+    {
+        "name": "Тревога при холодной морозилке и теплом холодильнике",
+        "conditions": [
+            "@temp_moroz < -15",
+            "@temp_body > -5"
+        ],
+        "actions": {
+            "!alert": "В морозилке холодно, в холодильнике тепло!",
+            "!email": "Включите тэн!",
+            "!tg": "Включи тэн, дружище!"
+        }
+    }
+]
