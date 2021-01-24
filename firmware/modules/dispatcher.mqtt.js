@@ -2,32 +2,32 @@
 
 
 module.exports = function(name, params) {
-       console.log(name, ">> create new dispatcher2")
-    this.name = name
-    this.params = params
+    // console.log(name, ">> create new MQTT dispatcher");
+    this.name = name;
+    this.params = params;
 
-    this.subsriptions = {}
-    this.wait_pubs = []
-    this.isConnected = false
-    this.isInitialized = false
-    this.timeReconnect = 3000
+    this.subsriptions = {};
+    this.wait_pubs = [];
+    this.isConnected = false;
+    this.isInitialized = false;
+    this.timeReconnect = 3000;
     this.client = require('MQTT').create(this.params.host, this.params.options);
 
     this.connect = (next) => {
 
         if (!this.isConnected) {
-            console.log("dispatcher.mqtt>> connect", this.isConnected, typeof next)
+            // console.log("dispatcher.mqtt>> connect", this.isConnected, typeof next)
             this.client.connect();
 
             this.client.on('connect', () => {
-                console.log("dispatcher.mqtt this.isConnected>>", typeof next);
+                // console.log("dispatcher.mqtt this.isConnected>>", typeof next);
                 if (!this.isConnected) {
                     this.isConnected = true;
                     this.timeReconnect = 3000;
 
 
                     if (this.isInitialized) return;
-                   console.log("dispatcher.mqtt>> init")
+                   // console.log("dispatcher.mqtt>> init")
 
                     this.client.on('disconnect', () => {
                         console.log('dispatcher.mqtt', 'closed');
@@ -88,8 +88,8 @@ module.exports = function(name, params) {
     }
 
 
-    this.pub = (topic, data, params) => {
-        console.log("pub", topic, data, params);
+    this.pub = (topic, data = null, params = {}) => {
+        console.log("publish", topic, data, params);
         if (!this.isConnected) {
             if (params.wait_connect) {
                 this.wait_pubs.push({topic, data});
@@ -110,7 +110,7 @@ module.exports = function(name, params) {
 
     this.clientSub = (topic) => {
         if (!this.isConnected) return;
-       console.log("dispatcher.mqtt>> sub", topic, this.isConnected);
+       // console.log("dispatcher.mqtt>> sub", topic, this.isConnected);
         this.client.subscribe(topic);
     }
 

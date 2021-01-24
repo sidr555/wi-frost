@@ -4,7 +4,7 @@
     "onewire": {
         "pin": 4,
         "check_time": 2,
-        "send_time": 5
+        "time_send": 5
     },
     "relays": {
         "compr": 5,

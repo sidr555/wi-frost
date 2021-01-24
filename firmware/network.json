@@ -22,5 +22,9 @@
             "protocol_name": "MQTT",
             "protocol_level": 4
         }
+    },
+    "time": {
+        "server": "http://google.com",
+        "utc_offset": 8
     }
 }

@@ -11,8 +11,8 @@ class OneWirePort {
 
         this.ids = bus.search();
         this.dallasTemps = this.ids.map( (id) => {
-            const itemParams = items.filter( (item) => item.id === id );
-            return new DallasTemp( bus, id, itemParams || { name: '' } );
+            const itemParams = items.find( (item) => item.id === id );
+            return new DallasTemp( bus, id, itemParams || {} );
         });
 
         if (params.time_check) {
@@ -22,26 +22,3 @@ class OneWirePort {
 }
 
 module.exports = OneWirePort;
-
-// module.exports = function(conf) {
-//     const ow = new OneWire(conf.pin);
-//
-//     this.dallasTemp = ow.search().map( (id) => {
-//         const dev = require('DS18B20').connect(ow, id);
-//         const obj = {
-//             id: id,
-//             dev: dev,
-//             check: () => {
-//                 dev.getTemp( (temp) => {
-//                     obj.temp = temp;
-//                     log('Check temp', id, temp);
-//                 });
-//             }
-//         };
-//         obj.check();
-//         setInterval(obj.check, conf.time_check * 1000);
-//         return obj;
-//     }, {});
-//
-//
-// };

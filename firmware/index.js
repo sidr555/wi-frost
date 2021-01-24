@@ -2,8 +2,11 @@ const Wifi = require('Wifi');
 const storage = require("Storage");
 const RelayPort = require('relay');
 const OneWirePort = require('1wire');
+// const fetchTime = require('now');
 
 let log = console.log;
+
+let startTime = new Date();
 
 const err_blinks = {
     badconf: 5,
@@ -67,23 +70,9 @@ if (!netconf) {
     log("Unit devices", Object.keys(devs));
 
 
-    const dallasTemps = devs.onewire ? devs.onewire.dallasTemps : [];
+    //const dallasTemps = devs.onewire ? devs.onewire.dallasTemps : [];
     log("1-wire IDs", devs.onewire.ids);
     // log("Dallas temp sensors", dallasTemp);
-
-    const Dispatcher = require('dispatcher.mqtt');
-    const mqtt = new Dispatcher(unitconf.name, netconf.mqtt);
-    // const mqtt = require('dispatcher.mqtt').create(unitconf.name, netconf.mqtt, {
-    //         onIn: () => blink(2, 50),
-    //         onOut: () => blink(1, 150),
-    //     });
-    // Set MQTT dispatcher
-
-    const topic = (name) => [unitconf.location, unitconf.name, name].join('/');
-    // let tempMap = {
-    //   '284d341104000093': 'moroz',
-    //   '28bf19110400009b': 'body'
-    // };
 
 
     let wifion = false;
@@ -109,6 +98,18 @@ if (!netconf) {
 
             log('WiFi successfully connected!');
 
+            // Ajust network time
+            require('now').ajustTime(netconf.time.server, netconf.time.utc_offset, (date) => {
+                log('Current time is ', new Date());
+                startTime = date;
+            });
+
+            // Set MQTT dispatcher
+            const Dispatcher = require('dispatcher.mqtt');
+            const mqtt = new Dispatcher(unitconf.name, netconf.mqtt);
+            // const mqtt = require('dispatcher.mqtt').create(unitconf.name, netconf.mqtt, {onIn: () => blink(2, 50), onOut: () => blink(1, 150),);
+
+            const topic = (name) => [unitconf.location, unitconf.name, name].join('/');
             // Connect MQTT
             log('MQTT connecting ' + netconf.mqtt.host + ':' + netconf.mqtt.options.port + ' ...');
 
@@ -118,36 +119,45 @@ if (!netconf) {
                 mqtt.client.on('message', () => blink(2, 50));
                 mqtt.client.on('publish', () => blink(1, 150));
 
-
                 //      mqtt.pub(topic('state'), [unitconf.name + ' is ready', new Date()]);
                 mqtt.pub(topic('state'), 'start');
 
-                mqtt.sub(topic('run'), (job) => {
+                mqtt.sub(topic('job/run'), (job) => {
                     log('JOB recieved', job);
                     worker.run(job, true, 'from mqtt');
                 });
 
-                mqtt.sub(topic('need_conf'), () => {
-                    log('unitconf request recieved');
-
-                    mqtt.pub(topic('unitconf'), unitconf);
-                    mqtt.pub(topic('jobconf'), jobconf);
+                mqtt.sub(topic('conf/unit/get'), () => {
+                    log('unit conf request recieved');
+                    mqtt.pub(topic('conf/unit'), unitconf);
                 });
-
+                mqtt.sub(topic('conf/job/get'), () => {
+                    log('job conf request recieved');
+                    mqtt.pub(topic('conf/job'), jobconf);
+                });
+                mqtt.sub(topic('conf/1wire/get'), () => {
+                    log('onewire request recieved');
+                    const items = devs.onewire.dallasTemps.map((item) => {
+                        return {
+                            id: item.id,
+                            params: item.params,
+                            value: item.value
+                        };
+                    });
+                    mqtt.pub(topic('conf/1wire'), items);
+                });
                 mqtt.sub(topic('test'), function(data) {
                     log('recieved MQTT', data);
                 });
 
-                if (devs.onewire && devs.onewire.dallasTemps && unitconf.onewire.send_time) {
+                if (devs.onewire && devs.onewire.dallasTemps) {
                     // Periodically sends temperature to server
-                    setInterval(() => {
-                        // log('Send temps', dallasTemp);
-                        dallasTemp.forEach((item) => {
-                            if (item.name) {
-                                mqtt.pub(topic('temp/' + item.name), item.temp);
-                            }
-                        });
-                    }, unitconf.onewire.send_time * 1000);
+                    devs.onewire.dallasTemps.forEach((item) => {
+                        if (item.name) {
+                            //log('Configure send loop for ', item);
+                            item.sendLoop(() => mqtt.pub(topic('dev/' + item.name), item.value) )
+                        }
+                    });
                 }
             });
         });
