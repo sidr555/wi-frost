@@ -57,7 +57,7 @@ class Unit {
 
     runJob(job) {
         this.store.setState(job.name)
-        this.mqtt.pub(this.topic + '/run', job.name)
+        this.mqtt.pub(this.topic + '/run/' + job.name)
     }
 
     init(config) {

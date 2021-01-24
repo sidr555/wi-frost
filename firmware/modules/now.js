@@ -20,4 +20,30 @@ module.exports = {
         });
     },
 
+    getFromHuman: (str) => {
+        console.log('getFromHuman', str);
+        return ['h', 'm', 's'].reduce((obj, delim) => {
+            const arr = str.split(delim);
+            console.log(delim, arr)
+            if (arr.length > 1) {
+                str = arr[1];
+                obj[delim] = arr[0];
+            } else {
+                obj[delim] = 0;
+            }
+            return obj;
+        }, {});
+    },
+
+    // Конвертирует дату вида "7h15m20s" в объект Date сегодня
+    getTodayFromHuman: (str) => {
+        console.log('getTodayFromHuman', str);
+        let date = new Date();
+        const times = getFromHuman(str);
+        date.setHours(times.h);
+        date.setMinutes(times.m);
+        date.setSeconds(times.s);
+        return date;
+    }
+
 }
