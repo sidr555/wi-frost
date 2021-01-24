@@ -7,6 +7,8 @@ class OneWirePort {
         this.name = params.name;
         this.pin = params.pin;
 
+        console.log("Initialize new 1-wire bus on port " + this.pin);
+
         const bus = new OneWire(params.pin);
 
         this.ids = bus.search();

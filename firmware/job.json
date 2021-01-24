@@ -2,7 +2,7 @@
     {
         "name": "Ручной запуск компрессора",
         "conditions": [
-            "^freeze"
+            "!freeze"
         ],
         "actions": {
             "compressor": true,
@@ -13,7 +13,7 @@
     {
         "name": "Ручной запуск отопителя",
         "conditions": [
-            "^heat"
+            "!heat"
         ],
         "actions": {
             "compressor": false,
@@ -24,7 +24,7 @@
     {
         "name": "Спящий режим",
         "conditions": [
-            "^sleep"
+            "!sleep"
         ],
         "actions": {
             "compressor": false,
@@ -39,22 +39,21 @@
     {
         "name": "Запуск компрессора при нагреве морозилки",
         "conditions": [
-            "@temp_moroz > -12",
-            "@heater = 0"
+            "./temp_moroz > -12",
+            "./heater = 0"
         ],
         "actions": {
             "compressor": true
         },
         "limits": {
             "minTime": "30m",
-            "maxTime": "2h",
-            "minRest": "30m"
+            "maxTime": "2h"
         }
     },
     {
         "name": "Остановка компрессора при охлаждении морозилки",
         "conditions": [
-            "@temp_moroz < -18"
+            "./temp_moroz < -18"
         ],
         "actions": {
             "compressor": false,
@@ -66,7 +65,7 @@
     {
         "name": "Остановка вентиля компрессора через 15 минут",
         "conditions": [
-            "@compressor rest 15m"
+            "./compressor rest 15m"
         ],
         "actions": {
             "compressor_fan": false
@@ -89,13 +88,22 @@
     {
         "name": "Тревога при холодной морозилке и теплом холодильнике",
         "conditions": [
-            "@temp_moroz < -15",
-            "@temp_body > -5"
+            "./temp_moroz < -15",
+            "./temp_body > -5"
         ],
         "actions": {
-            "!alert": "В морозилке холодно, в холодильнике тепло!",
-            "!email": "Включите тэн!",
-            "!tg": "Включи тэн, дружище!"
+            "@alert": "В морозилке холодно, в холодильнике тепло!",
+            "@email": "Включите тэн!",
+            "@tg": "Включи тэн, дружище!"
+        }
+    },
+    {
+        "name": "Дублирующий ребут через топик",
+        "conditions": [
+            "!reboot2"
+        ],
+        "actions": {
+            "@topic": "s-home/wi-frost/job/reboot"
         }
     }
 ]

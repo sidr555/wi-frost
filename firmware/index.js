@@ -1,7 +1,7 @@
 const Wifi = require('Wifi');
 const storage = require("Storage");
-const RelayPort = require('relay');
-const OneWirePort = require('1wire');
+const unit = require("unit");
+
 // const fetchTime = require('now');
 
 let log = console.log;
@@ -26,7 +26,7 @@ const blink = (num, delay) => {
 
 // Read connection data from the storage
 const netconf = storage.readJSON("network.json");
-const unitconf = storage.readJSON("unit.json");
+// const unitconf = storage.readJSON("unit.json");
 const jobconf = storage.readJSON("job.json");
 
 //log("network.json", netconf);
@@ -38,41 +38,41 @@ if (!netconf) {
     blink(err_blinks.badconf, 500);
 } else {
 
-    if (!unitconf) {
-        log("No Unit configuration found. Please create it in the storage with the name network.json");
-        storage.writeJSON(unit.json, {
-            name: 'unknown-unit',
-            location: 'unknown-location'
-        });
-    }
-
-    const devs = unitconf.devs.reduce((devs, dev) => {
-        switch (dev.type) {
-            case 'relay':
-                log("Initialize new Relay " + dev.name + ' on port ' + dev.pin);
-                devs[dev.name] = new RelayPort(dev, ()=>1);
-                if (dev.default) {
-                    devs[dev.name].on();
-                } else {
-                    devs[dev.name].off();
-                }
-                break;
-            case 'onewire':
-                log("Initialize new 1-wire bus on port " + dev.pin);
-                devs[dev.name] = new OneWirePort(dev, unitconf.onewire);
-                break;
-            default:
-                log("Ignore unknown dev type: " + dev.type);
-        }
-        return devs;
-    }, {});
-
-    log("Unit devices", Object.keys(devs));
-
-
-    //const dallasTemps = devs.onewire ? devs.onewire.dallasTemps : [];
-    log("1-wire IDs", devs.onewire.ids);
-    // log("Dallas temp sensors", dallasTemp);
+    // if (!unitconf) {
+    //     log("No Unit configuration found. Please create it in the storage with the name network.json");
+    //     storage.writeJSON(unit.json, {
+    //         name: 'unknown-unit',
+    //         location: 'unknown-location'
+    //     });
+    // }
+    //
+    // const devs = unitconf.devs.reduce((devs, dev) => {
+    //     switch (dev.type) {
+    //         case 'relay':
+    //             log("Initialize new Relay " + dev.name + ' on port ' + dev.pin);
+    //             devs[dev.name] = new RelayPort(dev, ()=>1);
+    //             if (dev.default) {
+    //                 devs[dev.name].on();
+    //             } else {
+    //                 devs[dev.name].off();
+    //             }
+    //             break;
+    //         case 'onewire':
+    //             log("Initialize new 1-wire bus on port " + dev.pin);
+    //             devs[dev.name] = new OneWirePort(dev, unitconf.onewire);
+    //             break;
+    //         default:
+    //             log("Ignore unknown dev type: " + dev.type);
+    //     }
+    //     return devs;
+    // }, {});
+    //
+    // log("Unit devices", Object.keys(devs));
+    //
+    //
+    // //const dallasTemps = devs.onewire ? devs.onewire.dallasTemps : [];
+    // log("1-wire IDs", devs.onewire.ids);
+    // // log("Dallas temp sensors", dallasTemp);
 
 
     let wifion = false;
@@ -137,7 +137,7 @@ if (!netconf) {
                 });
                 mqtt.sub(topic('conf/1wire/get'), () => {
                     log('onewire request recieved');
-                    const items = devs.onewire.dallasTemps.map((item) => {
+                    const items = unit.devs.onewire.dallasTemps.map((item) => {
                         return {
                             id: item.id,
                             params: item.params,
@@ -150,9 +150,9 @@ if (!netconf) {
                     log('recieved MQTT', data);
                 });
 
-                if (devs.onewire && devs.onewire.dallasTemps) {
+                if (unit.devs.onewire && unit.devs.onewire.dallasTemps) {
                     // Periodically sends temperature to server
-                    devs.onewire.dallasTemps.forEach((item) => {
+                    unit.devs.onewire.dallasTemps.forEach((item) => {
                         if (item.name) {
                             //log('Configure send loop for ', item);
                             item.sendLoop(() => mqtt.pub(topic('dev/' + item.name), item.value) )

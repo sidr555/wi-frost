@@ -8,7 +8,11 @@ class RelayPort extends DevPort {
 
     constructor(params, chk) {
         super(params);
+        console.log('Initialize new relay on port ' + this.pin, this.name);
         this.time = null;
+        if (typeof params.default !== 'undefined') {
+            this.set(params.default);
+        }
     }
 
     set(value, force = false) {

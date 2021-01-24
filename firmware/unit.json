@@ -1,6 +1,7 @@
 {
   "name": "wi-frost",
-  "location": "s-home",  "title": "Большой серый холодильник",
+  "location": "s-home",
+  "title": "Большой серый холодильник",
   "brand": "Daewoo",
   "model": "FR-530",
   "image": "https://naobzorah.ru/images/pr/380x380/123/122948/38744.jpg",
@@ -50,7 +51,8 @@
       "type": "relay",
       "name": "heater",
       "title": "Отопитель",
-      "default": 0
+      "default": 0,
+      "allowedTime": [["2h", "7h"], ["7h15m", "7h55m"]]
     },
     {
       "pin": 21,

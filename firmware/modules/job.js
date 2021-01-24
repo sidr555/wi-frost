@@ -1,62 +1,16 @@
-const storage = require('Storage');
-
-const store = storage.readJSON('job.json');
-
-const operators = ['=', '!=', '<', '<=', '>', '>='];
-
-class Condition {
-    constructor(topic = '', operator = '=', value = '') {
-        console.log('New condition', topic, operator, value);
-        this.topic = topic;
-        this.operator = operator;
-        this.value = value;
-        this._log = [];
-    }
-
-    toString() {
-        return [this.topic, this.operator, this.value].join(' ');
-    }
-
-    static parse(str) {
-        console.log('Parse condition from ', str);
-        for (let i=0; i<operators.length; i++) {
-            let arr = str.split(' ' + operators[i] + ' ');
-            if (arr.length === 2) {
-                return new Condition(arr[0], operators[i], arr[1]);
-            }
-        }
-        return null;
-    }
-
-    match(value) {
-        console.log('Check condition match value', this.toString(), value);
-        switch (this.operator) {
-            case '=':
-                return value == this.value;
-            case '>':
-                return value > this.value;
-            case '>=':
-                return value >= this.value;
-            case '<':
-                return value < this.value;
-            case '<=':
-                return value <= this.value;
-            case '!=':
-                return value != this.value;
-            default:
-                return false;
-        }
-    }
-}
+const unit = require('unit')
 
 class Job {
-    constructor(name, devs) {
-        const params = store.find((job) => job.name == name);
+    constructor(params) {
+        this.name = name;
 
         console.log('New job', name, params);
 
-        this.name = name;
-        this.devs = devs;
+        this.limits = {
+            minTime: null,
+            maxTime: null
+        };
+
         this.topics = {};
         if (this.params) {
             this.limits = params.limits;
@@ -71,15 +25,7 @@ class Job {
                 }
             });
         } else {
-            this.limits = {
-                minWorkTime: null,
-                maxWorkTime: null,
-                allowedTimeRanges: []
-            };
-
-            // this.target = null;     // target action
-            this.actions = [];      // array of {dev: name, value: val}
-            // this.actors = [];       // array of object {topic: 'name', value: 'last_value', related_conds_ids: [...]}
+            this.actions = {};         // object of dev_name: new_value
             this.conditions = [];
         }
         this.force = false;
@@ -124,8 +70,10 @@ class Job {
     matchConditions() {
         console.log('Check job is match all the conditions', this.name, this.conditions, this.topics);
         const count = this.conditions.reduce((count, condition) => {
-            if (condition.match(this.topics[condition.topic])) {
-                console.log('Job condition is match', condition.toString());
+            const value = this.topics[condition.topic];
+            console.log('Check job condition is match value', value, condition.toString());
+            if (value !== null && condition.match(value)) {
+                console.log('Match!');
                 count++;
             }
             return count;
@@ -146,23 +94,28 @@ class Job {
         this.startTime = new Date();
         this.force = force;
 
-        const count = this.actions.reduce((count, action) => {
-            console.log('Try to run action', action, force);
-            if (this.devs[action.dev] && this.devs.set(action.value)) {
-                console.log('Action is ran', action)
+        let total = 0;
+        const count = Object.keys(this.actions).reduce((count, name) => {
+            const value = this.actions[name];
+            console.log('Try to run action', name, value, force);
+
+            if (name[0] == '@' && this.notify(name.substr(1), value)) {
+                count++;
+            } else if (unit.devs[name] && unit.devs[name].set(value)) {
+                console.log('Action is ran', name, value)
                 this.dev.log({
                     type: 'job',
                     job: this.name,
-                    // value: action.value,
                     force: force
                 });
                 count ++;
             }
+            total++;
             return count;
         }, 0);
 
-        console.log('Ran ' + count + '/' + this.actions.length + ' actions', this.name);
-        return this.actions.length === count;
+        console.log('Ran ' + count + '/' + total + ' actions', this.name);
+        return count === total;
     }
 
     stop() {
@@ -189,4 +142,27 @@ class Job {
             this._log.shift();
         }
     }
+
+    notify(channel, value) {
+        switch(channel) {
+            case 'topic':
+                console.log("Notify with MQTT topic", value);
+                break;
+            case 'email':
+                console.log("Notify with email", value);
+                break;
+            case 'sms':
+                console.log("Notify with SMS", value);
+                break;
+            case 'tg':
+                console.log("Notify with telegram", value);
+                break;
+            default:
+                console.log("Notify with unknown channel", channel, value);
+                return false;
+        }
+        return true;
+    }
 }
+
+module.exports = Job;
