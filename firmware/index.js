@@ -1,7 +1,9 @@
-const Wifi = require('Wifi');
-const storage = require("Storage");
-const unit = require("unit");
+try {
 
+const wifi = require('Wifi');
+const storage = require("Storage");
+
+const unit = require("unit");
 // const fetchTime = require('now');
 
 let log = console.log;
@@ -76,11 +78,11 @@ if (!netconf) {
 
 
     let wifion = false;
-    Wifi.on('connected', (details) => {
+    wifi.on('connected', (details) => {
         log("WiFi connected!", details);
         wifion = true;
     });
-    Wifi.on('disconnected', (details) => {
+    wifi.on('disconnected', (details) => {
         blink(err_blinks.wifidis, 500);
         log("WiFi disconnected!", details);
         wifion = false;
@@ -90,7 +92,7 @@ if (!netconf) {
     const connectWiFi = () => {
         log('WiFi connecting ' + netconf.wifi.ssid + ' ...');
 
-        Wifi.connect(netconf.wifi.ssid, netconf.wifi, (err) => {
+        wifi.connect(netconf.wifi.ssid, netconf.wifi, (err) => {
             if (err) {
                 log('WiFi connect error: ' + err);
                 return;
@@ -106,10 +108,10 @@ if (!netconf) {
 
             // Set MQTT dispatcher
             const Dispatcher = require('dispatcher.mqtt');
-            const mqtt = new Dispatcher(unitconf.name, netconf.mqtt);
+            const mqtt = new Dispatcher(unit.name, netconf.mqtt);
             // const mqtt = require('dispatcher.mqtt').create(unitconf.name, netconf.mqtt, {onIn: () => blink(2, 50), onOut: () => blink(1, 150),);
 
-            const topic = (name) => [unitconf.location, unitconf.name, name].join('/');
+
             // Connect MQTT
             log('MQTT connecting ' + netconf.mqtt.host + ':' + netconf.mqtt.options.port + ' ...');
 
@@ -119,23 +121,23 @@ if (!netconf) {
                 mqtt.client.on('message', () => blink(2, 50));
                 mqtt.client.on('publish', () => blink(1, 150));
 
-                //      mqtt.pub(topic('state'), [unitconf.name + ' is ready', new Date()]);
-                mqtt.pub(topic('state'), 'start');
+                //      mqtt.pub(unit.topic + 'state', [unitname + ' is ready', new Date()]);
+                mqtt.pub(unit.topic + 'state', 'start');
 
-                mqtt.sub(topic('job/run'), (job) => {
+                mqtt.sub(unit.topic + 'job/run', (job) => {
                     log('JOB recieved', job);
                     worker.run(job, true, 'from mqtt');
                 });
 
-                mqtt.sub(topic('conf/unit/get'), () => {
+                mqtt.sub(unit.topic + 'conf/unit/get', () => {
                     log('unit conf request recieved');
-                    mqtt.pub(topic('conf/unit'), unitconf);
+                    mqtt.pub(unit.topic + 'conf/unit', unit.conf);
                 });
-                mqtt.sub(topic('conf/job/get'), () => {
+                mqtt.sub(unit.topic + 'conf/job/get', () => {
                     log('job conf request recieved');
-                    mqtt.pub(topic('conf/job'), jobconf);
+                    mqtt.pub(unit.topic + 'conf/job', job.conf);
                 });
-                mqtt.sub(topic('conf/1wire/get'), () => {
+                mqtt.sub(unit.topic + 'conf/1wire/get', () => {
                     log('onewire request recieved');
                     const items = unit.devs.onewire.dallasTemps.map((item) => {
                         return {
@@ -144,9 +146,9 @@ if (!netconf) {
                             value: item.value
                         };
                     });
-                    mqtt.pub(topic('conf/1wire'), items);
+                    mqtt.pub(unit.topic + 'conf/1wire', items);
                 });
-                mqtt.sub(topic('test'), function(data) {
+                mqtt.sub(unit.topic + 'test', function(data) {
                     log('recieved MQTT', data);
                 });
 
@@ -155,7 +157,7 @@ if (!netconf) {
                     unit.devs.onewire.dallasTemps.forEach((item) => {
                         if (item.name) {
                             //log('Configure send loop for ', item);
-                            item.sendLoop(() => mqtt.pub(topic('dev/' + item.name), item.value) )
+                            item.sendLoop(() => mqtt.pub(unit.topic + 'dev/' + item.name, item.value) )
                         }
                     });
                 }
@@ -166,7 +168,7 @@ if (!netconf) {
 
     if (!netconf.ap) {
         // Stop WiFi AP
-        Wifi.stopAP(() => {
+        wifi.stopAP(() => {
             connectWiFi();
         });
     } else {
@@ -183,6 +185,12 @@ if (!netconf) {
 
 
 }
+
+} catch(e) {
+    console.log("Global catch", e);
+}
+
+
 
 
 // log('State', ESP32.getState());

@@ -12,7 +12,7 @@ class DevPort {
         this._log = [];
     }
 
-    set(value, force=false) {
+    set(value, force) {
         if (this.value !== value) {
             console.log("Set DEV value", this.name, value, force);
 

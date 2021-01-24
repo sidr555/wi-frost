@@ -8,6 +8,7 @@ class RelayPort extends DevPort {
 
     constructor(params, chk) {
         super(params);
+        this.chk = chk
         console.log('Initialize new relay on port ' + this.pin, this.name);
         this.time = null;
         if (typeof params.default !== 'undefined') {
@@ -15,14 +16,14 @@ class RelayPort extends DevPort {
         }
     }
 
-    set(value, force = false) {
-        if (super.set(value, force)) {
-            if (!this.time || force || chk(act)) {
+    set(value, force) {
+        if (!this.time || force || this.chk(value)) {
+            if (super.set(value, force)) {
                 // console.log('set relay on pin', pin, act)
-                console.log('switch ' + this.name + ' ' + act ? 'ON' : 'OFF');
-                this.time = require('now').now();
-                this.act = act;
-                digitalWrite(this.pin, act ? HIGH : LOW);
+                console.log('switch ' + this.name + ' ' + value ? 'ON' : 'OFF');
+                this.time = new Date();
+                this.value = value;
+                digitalWrite(this.pin, value ? HIGH : LOW);
                 return true;
             }
         }
