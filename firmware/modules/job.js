@@ -57,15 +57,17 @@ class Job {
 
         this.name = name;
         this.devs = devs;
+        this.topics = {};
         if (this.params) {
             this.limits = params.limits;
 
             this.conditions = [];
             // topic1 > 6.5 and topic2 != 0 and topic3 > 0
             params.conditions.split(' and ').forEach((str) => {
-                const cond = Condition.parse(str);
-                if (cond) {
-                    this.conditions.push(cond);
+                const condition = Condition.parse(str);
+                if (condition) {
+                    this.conditions.push(condition);
+                    this.topics[condition.topic] = null;
                 }
             });
         } else {
@@ -78,7 +80,6 @@ class Job {
             // this.target = null;     // target action
             this.actions = [];      // array of {dev: name, value: val}
             // this.actors = [];       // array of object {topic: 'name', value: 'last_value', related_conds_ids: [...]}
-            this.topics = {};       //
             this.conditions = [];
         }
         this.force = false;

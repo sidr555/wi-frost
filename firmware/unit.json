@@ -33,7 +33,10 @@
       "type": "relay",
       "name": "compressor",
       "title": "Компрессор",
-      "default": 1
+      "default": 1,
+      "minTime": "30m",
+      "maxTime": null,
+      "minRest": "30m"
     },
     {
       "pin": 18,

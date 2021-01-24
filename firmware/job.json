@@ -1,5 +1,71 @@
 {
-    "job": {
-        "time_loop": 2
-    }
+    "jobs": [
+        {
+            "name": "Запуск компрессора при нагреве морозилки",
+            "actions": [{
+                "dev": "compressor",
+                "value": true
+            }],
+            "conditions": [
+                "@temp_moroz > -12",
+                "@heater = 0"
+            ],
+            "limits": {
+                "minTime": "30m",
+                "maxTime": "2h",
+                "minRest": "30m"
+            }
+        }, {
+            "name": "Остановка компрессора при охлаждении морозилки",
+            "actions": [{
+                "dev": "compressor",
+                "value": false
+            },{
+                "dev": "compressor_fan",
+                "value": true
+            }],
+            "conditions": [
+                "@temp_moroz < -18"
+            ],
+            "limits": {
+            }
+        }, {
+            "name": "Остановка вентиля компрессора через 15 минут",
+            "actions": [{
+                "dev": "compressor_fan",
+                "value": false
+            }],
+            "conditions": [
+                "@compressor rest 15m"
+            ]
+        }, {
+            "name": "Включение ТЭН ночью",
+            "actions": [{
+                "dev": "compressor",
+                "value": false
+            }, {
+                "dev": "heater",
+                "value": true
+            }],
+            "conditions": [
+                "#clock >= 4h",
+                "#clock < 7h"
+            ],
+            "limits": {
+                "minTime": "2h"
+            }
+        },{
+            "name": "Тревога при холодной морозилке и теплом холодильнике",
+            "actions": [{
+                "dev": "!alert",
+                "value": "В морозилке холодно,в холодильнике тепло"
+            }],
+            "conditions": [
+                "@temp_moroz < -15",
+                "@temp_body > -5"
+            ]
+        }
+
+    ],
+    "time_loop": 2
 }
