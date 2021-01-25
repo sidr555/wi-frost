@@ -2,6 +2,9 @@
 
 const storage = require("Storage");
 const devFactory = require("dev_factory");
+const publisher = require("publisher");
+const logger = require("logger");
+
 
 class Unit {
     constructor() {
@@ -13,51 +16,51 @@ class Unit {
         this.name = this.conf.name;
         this.location = this.conf.location;
 
-        console.log("Construct UNIT", this.topic);
+        this.log("Construct UNIT", this.topic);
 
         this.devs = [];
         if (this.conf.devs && this.conf.devs.length) {
             this.devs = this.conf.devs.reduce((devs, dev) => {
                 devs[dev.name] = devFactory(dev.type, dev, this.conf);
+
+                if (dev.name === 'onewire' && devs.onewire.dallasTemps ) {
+                    devs.onewire.dallasTemps.forEach((item) => {
+                        if (item.name) {
+                            devs[item.name] = item;
+                        }
+                    })
+                }
                 return devs;
-                // switch (dev.type) {
-                //     case 'relay':
-                //         log("Initialize new Relay " + dev.name + ' on port ' + dev.pin);
-                //         devs[dev.name] = new RelayPort(dev, ()=>1);
-                //         if (dev.default) {
-                //             devs[dev.name].on();
-                //         } else {
-                //             devs[dev.name].off();
-                //         }
-                //         break;
-                //     case 'onewire':
-                //         log("Initialize new 1-wire bus on port " + dev.pin);
-                //         devs[dev.name] = new OneWirePort(dev, unitconf.onewire);
-                //         break;
-                //     default:
-                //         log("Ignore unknown dev type: " + dev.type);
-                // }
             }, {});
         }
 
-        console.log("Unit devices", Object.keys(this.devs));
-        console.log("1-wire IDs", this.devs.onewire.ids);
+        Object.keys(this.devs).forEach((name) => {
+            const dev = this.devs[name];
+            Object.assign(dev, publisher);
+            if (dev.conf.log > 0) {
+                Object.assign(dev, logger, {logLimit: dev.conf.log});
+            }
+        });
 
-        this._log = [];
+        this.log("Unit devices", Object.keys(this.devs));
+        this.log("1-wire IDs", this.devs.onewire.ids);
+
+    }
+
+    useMQTT(mqtt) {
+        Object.keys(this.devs).forEach((name) => {
+            const dev = this.devs[name];
+            if (dev && !dev.conf.silent && dev.subs && dev.subs.length >= 0) {
+                //dev.subs = [];
+                dev.subs.push((value) => mqtt.pub(this.topic + name, value));
+            }
+        })
     }
 
     get topic() {
         return this.location + '/' + this.name + '/';
     }
-
-    log(params) {
-        params.time = new Date();
-        console.log("UNIT log", params);
-        this._log.push(params);
-        if (this._log.length > 100) {
-            this._log.shift();
-        }
-    }
 }
 
-module.exports = new Unit();
+Object.assign(Unit.prototype, logger);
+module.exports = Unit;

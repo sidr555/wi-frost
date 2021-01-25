@@ -1,6 +1,6 @@
 [
     {
-        "name": "Ручной запуск компрессора",
+        "name": "Start compressor from App",
         "conditions": [
             "!freeze"
         ],
@@ -8,10 +8,11 @@
             "compressor": true,
             "heater": false
         },
-        "force": true
+        "force": true,
+        "log": 10
     },
     {
-        "name": "Ручной запуск отопителя",
+        "name": "Start heater from App",
         "conditions": [
             "!heat"
         ],
@@ -19,10 +20,11 @@
             "compressor": false,
             "heater": true
         },
-        "force": true
+        "force": true,
+        "log": 10
     },
     {
-        "name": "Спящий режим",
+        "name": "Sleep for an hour",
         "conditions": [
             "!sleep"
         ],
@@ -37,7 +39,7 @@
         "force": true
     },
     {
-        "name": "Запуск компрессора при нагреве морозилки",
+        "name": "Start compressor on warm moroz",
         "conditions": [
             "./temp_moroz > -12",
             "./heater = 0"
@@ -48,10 +50,11 @@
         "limits": {
             "minTime": "30m",
             "maxTime": "2h"
-        }
+        },
+        "log": 10
     },
     {
-        "name": "Остановка компрессора при охлаждении морозилки",
+        "name": "Start compressor on good moroz",
         "conditions": [
             "./temp_moroz < -18"
         ],
@@ -63,7 +66,7 @@
         }
     },
     {
-        "name": "Остановка вентиля компрессора через 15 минут",
+        "name": "Stop fan after compressor (15 mins)",
         "conditions": [
             "./compressor rest 15m"
         ],
@@ -72,7 +75,7 @@
         }
     },
     {
-        "name": "Включение отопителя ночью",
+        "name": "Start heater at night",
         "conditions": [
             "#clock >= 4h",
             "#clock < 7h"
@@ -86,19 +89,19 @@
         }
     },
     {
-        "name": "Тревога при холодной морозилке и теплом холодильнике",
+        "name": "Warn on cold moroz and warm body",
         "conditions": [
             "./temp_moroz < -15",
             "./temp_body > -5"
         ],
         "actions": {
-            "@alert": "В морозилке холодно, в холодильнике тепло!",
-            "@email": "Включите тэн!",
-            "@tg": "Включи тэн, дружище!"
+            "@alert": "Cold head and warm body is good for man and bad for fridge!",
+            "@email": "Start the heater!",
+            "@tg": "Start the heater, man!"
         }
     },
     {
-        "name": "Дублирующий ребут через топик",
+        "name": "Double reboot topic",
         "conditions": [
             "!reboot2"
         ],

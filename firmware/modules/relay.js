@@ -6,13 +6,13 @@ const LOW = 1;
 
 class RelayPort extends DevPort {
 
-    constructor(params, chk) {
-        super(params);
+    constructor(conf, chk) {
+        super(conf);
         this.chk = chk
         console.log('Initialize new relay on port ' + this.pin, this.name);
         this.time = null;
-        if (typeof params.default !== 'undefined') {
-            this.set(params.default);
+        if (typeof conf.default !== 'undefined') {
+            this.set(conf.default);
         }
     }
 

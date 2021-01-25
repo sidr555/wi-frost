@@ -1,10 +1,11 @@
-const unit = require('unit');
+// const unit = require('unit');
 
 const operators = ['=', '!=', '<', '<=', '>', '>=', 'run'];
 
 class Condition {
-    constructor(topic = '', operator = '=', value = '') {
-        this.topic = topic.substr(0,2) === './' ? unit.topic + 'dev/' + topic.substr(2) : topic;
+    constructor(topic, operator, value) {
+        // this.topic = topic.substr(0,2) === './' ? unittopic + 'dev/' + topic.substr(2) : topic;
+        this.topic = topic;
         this.operator = operator;
         this.value = value;
         this._log = [];
@@ -18,17 +19,14 @@ class Condition {
 
     static parse(str) {
         console.log('Parse condition from ', str);
-        if (str[0] === '!') {
-            // run job topic
-            return new Condition(unit.topic + 'run/' + str.substr[1], 'run');
-        } else {
-            for (let i=0; i<operators.length; i++) {
-                let arr = str.split(' ' + operators[i] + ' ');
-                if (arr.length === 2) {
-                    return new Condition(arr[0], operators[i], arr[1]);
-                }
+
+        for (let i=0; i<operators.length; i++) {
+            let arr = str.split(' ' + operators[i] + ' ');
+            if (arr.length === 2) {
+                return new Condition(arr[0], operators[i], arr[1]);
             }
         }
+
         return null;
     }
 

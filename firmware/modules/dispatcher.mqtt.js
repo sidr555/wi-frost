@@ -1,17 +1,17 @@
 // Use Dispatcher to connect and handle messages (like WebSocket or MQTT)
 
 
-module.exports = function(name, params) {
+module.exports = function(name, conf) {
     // console.log(name, ">> create new MQTT dispatcher");
     this.name = name;
-    this.params = params;
+    this.conf = conf;
 
     this.subsriptions = {};
     this.wait_pubs = [];
     this.isConnected = false;
     this.isInitialized = false;
     this.timeReconnect = 3000;
-    this.client = require('MQTT').create(this.params.host, this.params.options);
+    this.client = require('MQTT').create(this.conf.host, this.conf.options);
 
     this.connect = (next) => {
 
@@ -88,10 +88,10 @@ module.exports = function(name, params) {
     }
 
 
-    this.pub = (topic, data = null, params = {}) => {
-        console.log("publish", topic, data, params);
+    this.pub = (topic, data = null, conf = {}) => {
+        // console.log("publish", topic, data, conf);
         if (!this.isConnected) {
-            if (params.wait_connect) {
+            if (conf.wait_connect) {
                 this.wait_pubs.push({topic, data});
             }
             return;

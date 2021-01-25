@@ -2,17 +2,17 @@
 const DS18B20 = require('DS18B20');
 
 class DallasTemp {
-    constructor(bus, id, params) {
+    constructor(bus, id, conf) {
         this.id = id;
-        this.name = params.name;
-        this.params = params;
+        this.name = conf.name;
+        this.conf = conf;
 
         this.dev = DS18B20.connect(bus, id);
         this.value = null;
         this.interval = null;
 
         this.check();
-        // console.log("new DALLAS", id, this.name, params.name, typeof params)
+        // console.log("new DALLAS", id, this.name, conf.name, typeof conf)
     }
     check() {
         this.dev.getTemp( (t) => {
@@ -24,8 +24,13 @@ class DallasTemp {
         if (this.interval) {
             clearInterval(this.interval)
         }
-        if (this.params.time_send) {
-            this.interval = setInterval(routine, this.params.time_send * 1000)
+        if (this.conf.time_send) {
+            // this.interval = setInterval(routine, this.conf.time_send * 1000)
+            this.interval = setInterval(() => {
+                this.subs.forEach((handle) => {
+                    handle(this.value);
+                });
+            }, this.conf.time_send * 1000)
         }
     }
 }

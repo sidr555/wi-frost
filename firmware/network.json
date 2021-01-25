@@ -2,7 +2,8 @@
     "wifi": {
         "ssid": "Keenetic-0186",
         "password": "R838rPfr",
-        "time_check": 10
+        "time_check": 10,
+        "time_reconnect": 30
     },
     "tinymqtt": {
         "host": "maxdrv.ru",

@@ -37,7 +37,8 @@
       "default": 1,
       "minTime": "30m",
       "maxTime": null,
-      "minRest": "30m"
+      "minRest": "30m",
+      "log": 100
     },
     {
       "pin": 18,
@@ -68,14 +69,16 @@
       "type": "temp_dallas",
       "name": "temp_moroz",
       "title": "Морозильная камера",
-      "time_send": 20
+      "time_send": 20,
+      "log": 10
     },
     {
       "id": "28bf19110400009b",
       "type": "temp_dallas",
       "name": "temp_body",
       "title": "Холодильная камера",
-      "time_send": 10
+      "time_send": 10,
+      "silent": true
     }
   ]
 }

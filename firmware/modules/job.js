@@ -1,43 +1,60 @@
-const unit = require('unit')
+const Condition = require('condition');
+const logger = require('logger');
 
 class Job {
-    constructor(params) {
-        this.name = name;
+    constructor(conf) {
+        this.name = conf.name;
+        this.unit = unit;
+        this.conf = conf;
 
-        console.log('New job', name, params);
+        //console.log('New job', this.name, conf);
 
         this.limits = {
             minTime: null,
             maxTime: null
         };
+         try {
+             this.topics = {};
+             if (this.conf) {
+                 this.limits = conf.limits;
 
-        this.topics = {};
-        if (this.params) {
-            this.limits = params.limits;
+                 this.conditions = [];
 
-            this.conditions = [];
-            // topic1 > 6.5 and topic2 != 0 and topic3 > 0
-            params.conditions.split(' and ').forEach((str) => {
-                const condition = Condition.parse(str);
-                if (condition) {
-                    this.conditions.push(condition);
-                    this.topics[condition.topic] = null;
-                }
-            });
-        } else {
-            this.actions = {};         // object of dev_name: new_value
-            this.conditions = [];
-        }
+                 if (conf.conditions[0] === '!') {
+                     // run command
+                     this.command = conf.conditions.substr(1);
+                 } else {
+                     // topic1 > 6.5 and topic2 != 0 and topic3 > 0
+                     conf.conditions.split(' and ').forEach((str) => {
+
+                         const condition = Condition.parse(str);
+                         if (condition) {
+                             this.conditions.push(condition);
+                             this.topics[condition.topic] = null;
+                         }
+                     });
+                 }
+
+             } else {
+                 this.actions = {};         // object of dev_name: new_value
+                 this.conditions = [];
+                 this.command = null;
+             }
+         } catch (e) {
+             console.log("Exc job", e);
+             throw e;
+         }
+
         this.force = false;
         this.startTime = null;
-        this.runLog = [];
-        console.log('Job constructed', this);
+        this._log = [];
+        console.log('New Job - ' + this.name, this.conf);
 
     }
 
-    // subscribes job on mqtt mesages from the main routine
+    //subscribes job on mqtt mesages from the main routine
     subscribe(next) {
-        console.log('subscribe job', this.name);
+        this.log && this.log('subscribe job', this.name);
 
         Object.keys(this.topics).forEach((topic) => {
             next(topic, (value) => {
@@ -87,7 +104,7 @@ class Job {
 
     }
 
-    run(force = false) {
+    run(force) {
         console.log('Run job', this.name, force);
         // todo check limits
 
@@ -101,13 +118,13 @@ class Job {
 
             if (name[0] == '@' && this.notify(name.substr(1), value)) {
                 count++;
-            } else if (unit.devs[name] && unit.devs[name].set(value)) {
+            } else if (this.unit.devs[name] && this.unit.devs[name].set(value)) {
                 console.log('Action is ran', name, value)
-                this.dev.log({
-                    type: 'job',
-                    job: this.name,
-                    force: force
-                });
+                // this.dev.log({
+                //     type: 'job',
+                //     job: this.name,
+                //     force: force
+                // });
                 count ++;
             }
             total++;
@@ -132,17 +149,6 @@ class Job {
         return this.startTime ? parseInt((Date.now() -  this.startTime) / 1000) : 0;
     }
 
-    log(params) {
-        // params.name = this.name;
-        params.time = new Date();
-        params.value = this.value
-        console.log('JOB log', this.name, params);
-        this._log.push(params);
-        if (this._log.length > 100) {
-            this._log.shift();
-        }
-    }
-
     notify(channel, value) {
         switch(channel) {
             case 'topic':
@@ -164,5 +170,6 @@ class Job {
         return true;
     }
 }
+Object.assign(Job.prototype, logger);
 
 module.exports = Job;
