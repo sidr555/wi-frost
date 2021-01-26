@@ -17,6 +17,8 @@ try {
         blinker(5);
     }
 
+
+
     // Read connection data from the storage
     const netconf = storage.readJSON('network.json');
     if (!netconf) {
@@ -69,49 +71,9 @@ try {
                     mqtt.client.on('publish', () => blinker(1, 150));
 
                     //      mqtt.pub(unit.topic + 'state', [unitname + ' is ready', new Date()]);
-                    mqtt.pub(unit.topic + 'state', 'start');
+                    mqtt.pub(unit.topic + 'hello');
 
-                    mqtt.sub(unit.topic + 'job/run', (job) => {
-                        log('JOB recieved', job);
-                        worker.run(job, true, 'from mqtt');
-                    });
-
-                    mqtt.sub(unit.topic + 'conf/unit/get', () => {
-                        log('unit conf request recieved');
-                        mqtt.pub(unit.topic + 'conf/unit', unit.conf);
-                    });
-                    mqtt.sub(unit.topic + 'conf/job/get', () => {
-                        log('job conf request recieved');
-                        mqtt.pub(unit.topic + 'conf/job', job.conf);
-                    });
-                    mqtt.sub(unit.topic + 'conf/1wire/get', () => {
-                        log('onewire request recieved');
-                        const items = unit.devs.onewire.dallasTemps.map((item) => {
-                            return {
-                                id: item.id,
-                                conf: item.conf,
-                                value: item.value
-                            };
-                        });
-                        mqtt.pub(unit.topic + 'conf/1wire', items);
-                    });
-                    mqtt.sub(unit.topic + 'test', function(data) {
-                        log('recieved MQTT', data);
-                    });
-
-                    unit.useMQTT(mqtt);
-
-                    // if (unit.devs.onewire && unit.devs.onewire.dallasTemps) {
-                    //     // Periodically sends temperature to server
-                    //     unit.devs.onewire.dallasTemps.forEach((item) => {
-                    //         if (item.name) {
-                    //             //log('Configure send loop for ', item);
-                    //             item.sendLoop(() => mqtt.pub(unit.topic + 'dev/' + item.name, item.value) )
-                    //         }
-                    //     });
-                    // }
-
-                    worker.subscribe(mqtt);
+                    worker.useMQTT(mqtt);
                 });
             });
         };

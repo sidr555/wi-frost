@@ -20,6 +20,7 @@
             "compressor": false,
             "heater": true
         },
+        "minTime": "15m",
         "force": true,
         "log": 10
     },

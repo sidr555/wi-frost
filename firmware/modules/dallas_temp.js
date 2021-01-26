@@ -1,39 +1,29 @@
 // Use this to work with DS18B20 temperature sensors
+const Actor = require('actor');
 const DS18B20 = require('DS18B20');
 
-class DallasTemp {
-    constructor(bus, id, conf) {
-        this.id = id;
-        this.name = conf.name;
-        this.conf = conf;
-
-        this.dev = DS18B20.connect(bus, id);
-        this.value = null;
-        this.interval = null;
-
-        this.check();
+class DallasTemp extends Actor {
+    constructor(conf, id, bus) {
+        try {
+            super(conf);
+            this.id = id;
+            this.dev = DS18B20.connect(bus, id);
+            //this.interval = null;
+            this.get();
         // console.log("new DALLAS", id, this.name, conf.name, typeof conf)
+        } catch (e) {
+            console.log("Exception in dallastemp constructor", e);
+            throw e;
+        }
     }
-    check() {
+    get() {
+        // this.log("get temperature");
         this.dev.getTemp( (t) => {
-            this.value = t;
+            this.set(t);
         })
     }
-
-    sendLoop(routine) {
-        if (this.interval) {
-            clearInterval(this.interval)
-        }
-        if (this.conf.time_send) {
-            // this.interval = setInterval(routine, this.conf.time_send * 1000)
-            this.interval = setInterval(() => {
-                this.subs.forEach((handle) => {
-                    handle(this.value);
-                });
-            }, this.conf.time_send * 1000)
-        }
-    }
 }
+
 
 module.exports = DallasTemp;
 

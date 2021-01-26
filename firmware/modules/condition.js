@@ -4,13 +4,17 @@ const operators = ['=', '!=', '<', '<=', '>', '>=', 'run'];
 
 class Condition {
     constructor(topic, operator, value) {
-        // this.topic = topic.substr(0,2) === './' ? unittopic + 'dev/' + topic.substr(2) : topic;
-        this.topic = topic;
-        this.operator = operator;
-        this.value = value;
-        this._log = [];
+        try {
+            // this.topic = topic.substr(0,2) === './' ? unittopic + 'dev/' + topic.substr(2) : topic;
+            this.topic = topic;
+            this.operator = operator;
+            this.value = value;
 
-        console.log('New condition', topic, operator, value);
+            console.log('New condition', topic, operator, value);
+        } catch (e) {
+            console.log("Exception in unit constructor", e);
+            throw e;
+        }
     }
 
     toString() {

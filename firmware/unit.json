@@ -27,7 +27,8 @@
       "type": "onewire",
       "name": "onewire",
       "title": "Шина 1-wire",
-      "time_check": 10
+      "time_check": 10,
+      "silent": true
     },
     {
       "pin": 5,

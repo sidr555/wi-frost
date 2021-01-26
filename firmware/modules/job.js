@@ -1,11 +1,15 @@
+const logable = require('logable');
+const timeable = require('timeable');
+const observable = require('observable');
+
 const Condition = require('condition');
-const logger = require('logger');
 
 class Job {
-    constructor(conf) {
+    constructor(conf, unit) {
         this.name = conf.name;
         this.unit = unit;
         this.conf = conf;
+        this.buggy = false; // true on some config errors
 
         //console.log('New job', this.name, conf);
 
@@ -13,43 +17,51 @@ class Job {
             minTime: null,
             maxTime: null
         };
-         try {
-             this.topics = {};
-             if (this.conf) {
-                 this.limits = conf.limits;
+        this.conditions = [];
+        this.actions = {};         // object of dev_name: new_value
+        this.command = null;
 
-                 this.conditions = [];
+        try {
+            this.topics = {};
+            if (this.conf) {
+                this.limits = conf.limits;
 
-                 if (conf.conditions[0] === '!') {
-                     // run command
-                     this.command = conf.conditions.substr(1);
-                 } else {
-                     // topic1 > 6.5 and topic2 != 0 and topic3 > 0
-                     conf.conditions.split(' and ').forEach((str) => {
+                console.log("Parse job conditions", this.name, conf.conditions)
 
-                         const condition = Condition.parse(str);
-                         if (condition) {
-                             this.conditions.push(condition);
-                             this.topics[condition.topic] = null;
-                         }
-                     });
-                 }
+                if (conf.conditions && conf.conditions.length) {
+                    conf.conditions.forEach((str) => {
+                        if (str[0] === '!') {
+                            // run command
+                            this.command = str.substr(1);
 
-             } else {
-                 this.actions = {};         // object of dev_name: new_value
-                 this.conditions = [];
-                 this.command = null;
-             }
-         } catch (e) {
-             console.log("Exc job", e);
-             throw e;
-         }
+                        } else if (str.length) {
+                            str.split(' and ').forEach((chunk) => {
+                                try {
+                                    const condition = Condition.parse(chunk);
+                                    if (condition) {
+                                        this.conditions.push(condition);
+                                        this.topics[condition.topic] = null;
+                                    } else {
+                                        this.buggy = true;
+                                    }
+                                } catch(e) {
+                                    this.buggy = true;
+                                }
+                            });
+                        }
+                    })
+                }
+            }
 
-        this.force = false;
-        this.startTime = null;
-        this._log = [];
-        console.log('New Job - ' + this.name, this.conf);
 
+            // this.force = false;
+            this.startTimer();
+
+            console.log('New Job - ' + this.name/*, this.conf*/);
+        } catch (e) {
+            console.log("Exception in job constructor", e);
+            throw e;
+        }
     }
 
     //subscribes job on mqtt mesages from the main routine
@@ -170,6 +182,6 @@ class Job {
         return true;
     }
 }
-Object.assign(Job.prototype, logger);
+Object.assign(Job.prototype, logable, timeable, observable);
 
 module.exports = Job;

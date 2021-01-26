@@ -1,40 +1,37 @@
 // Bacis unit port device
 
-class DevPort {
+const logable = require('logable');
+const observable = require('observable');
+
+class Dev {
 
     constructor(conf) {
-        this.name = conf.name;
-        this.pin = conf.pin;
-        this.value = conf.default || null;
+        try {
+            this.conf = conf;
+            this.name = conf.name;
+            this.pin = conf.pin;
+            this.value = conf.default || null;
 
-        console.log("New DEV", this.name, this.value);
+            console.log("New DEV", this.name, this.value);
 
-        this._log = [];
-
+            this._log = [];
+        } catch (e) {
+            console.log("Exception in dev constructor", e);
+            throw e;
+        }
     }
 
     set(value, force) {
         if (this.value !== value) {
             console.log("Set DEV value", this.name, value, force);
             this.value = value;
-
-            this.subs.forEach((handle) => handle(this.value));
-
+            this.pub(value);
             return true;
         }
         return false;
     }
-
-    log(data) {
-        // param.name = this.name;
-        data.time = new Date();
-        data.value = this.value
-        console.log("DEV log", this.name, data);
-        this._log.push(data);
-        if (this._log.length > 100) {
-            this._log.shift();
-        }
-    }
 }
 
-module.exports = DevPort;
+Object.assign(Dev.prototype, logable, observable);
+
+module.exports = Dev;

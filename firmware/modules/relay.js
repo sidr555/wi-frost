@@ -1,28 +1,31 @@
 // Use this to switch relays smartly
-const DevPort = require('dev');
+const Actor = require('actor');
 
 const HIGH = 0;
 const LOW = 1;
 
-class RelayPort extends DevPort {
+class Relay extends Actor {
 
-    constructor(conf, chk) {
-        super(conf);
-        this.chk = chk
-        console.log('Initialize new relay on port ' + this.pin, this.name);
-        this.time = null;
-        if (typeof conf.default !== 'undefined') {
-            this.set(conf.default);
+    constructor(conf) {
+        try {
+            super(conf);
+            this.pin = conf.pin;
+            // this.chk = chk
+            console.log('Initialize new relay on port ' + this.pin, this.name, conf.default);
+            if (conf.default) {
+                setTimeout(() => this.on(true), 1000);
+                // this.on(true);
+            }
+        } catch (e) {
+            console.log("Exception in relay constructor", e);
+            throw e;
         }
     }
 
     set(value, force) {
-        if (!this.time || force || this.chk(value)) {
+        if (!this.time || force) {
             if (super.set(value, force)) {
-                // console.log('set relay on pin', pin, act)
                 console.log('switch ' + this.name + ' ' + value ? 'ON' : 'OFF');
-                this.time = new Date();
-                this.value = value;
                 digitalWrite(this.pin, value ? HIGH : LOW);
                 return true;
             }
@@ -31,12 +34,15 @@ class RelayPort extends DevPort {
     }
 
     on(force) {
+        this.log("Turn relay ON");
         return this.set(true, force);
     }
-
     off(force) {
+        this.log("Turn relay OFF");
         return this.set(false, force);
     }
+
+
 }
 
-module.exports = RelayPort;
+module.exports = Relay;
