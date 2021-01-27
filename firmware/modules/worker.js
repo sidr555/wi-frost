@@ -51,25 +51,24 @@ class Worker {
                                 this.log('subscribe local dev on topic', topic);
                                 const dev = this.unit.devs[topic.substr(2)];
                                 if (dev) {
-                                    dev.sub(job.name, (name, value) => {
-                                        this.log('updated dev state', [job.name, name, value, job.topics]);
+                                    dev.sub(job.name, (value) => {
+                                        this.log('updated dev state', [job.name, dev.name, value, job.topics]);
                                         job.topics[topic] = value;
                                         this.log('updated dev state', {
                                             job: job.name,
-                                            name: name,
-                                            devname: dev.name,
+                                            name: dev.name,
                                             value: value,
                                             topic: topic,
                                             topics: job.topics
                                         });
-                                        if (0 && job.matchConditions()) {
+                                        if (job.matchConditions()) {
                                             this.runJob(job);
                                         }
                                     });
                                 }
                                 // const name = topic.substr(2);
                                 // if (this.unit.devs[name]) {
-                                //     this.unit.devs[name].sub(job.name, (name, value) => {
+                                //     this.unit.devs[name].sub(job.name, (value) => {
                                 //         this.log('updated dev state', [job.name, name, value, job.topics]);
                                 //         job.topics[topic] = value;
                                 //         if (job.matchConditions()) {
@@ -147,7 +146,7 @@ class Worker {
                 console.log("Broadcast unit dev`s updates", name)
                 let dev = this.unit.devs[name];
                 if (dev && !dev.silent) {
-                    dev.sub('mqtt', (name, value) => mqtt.pub(this.unit.topic + 'dev/' + name, value));
+                    dev.sub('mqtt', (value) => mqtt.pub(this.unit.topic + 'dev/' + name, value));
                 }
             });
 

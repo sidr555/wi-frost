@@ -1,7 +1,7 @@
 // Bacis self-timer
 
 const Timeable = {
-    timeStart: null,
+    // timeStart: null,
     startTimer: function() {
         this.timeStart = new Date();
     },

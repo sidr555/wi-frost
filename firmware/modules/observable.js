@@ -1,20 +1,23 @@
+const store = {};
 const Observable = {
-    store: {},
     silent: false,
 
-    sub: function(id, handler) {
-        this.store[id] = handler;
+    sub: function(jobname, handler) {
+        if (!store[this.name]) {
+            store[this.name] = {};
+        }
+        store[this.name][jobname] = handler;
     },
     pub: function(value) {
         if (!this.silent) {
             if (typeof value === 'undefined') {
                 value = this.value
             }
-            console.log("Publish value", this.name, value);
+            // console.log("Publish value", this.name, value);
 
-            Object.keys(this.store).forEach((name) => {
-                console.log("pub for job", name);
-                this.store[name](this.name, value);
+            Object.keys(store[this.name]).forEach((jobname) => {
+                console.log("pub for job", jobname);
+                store[this.name][jobname](value);
 
             });
         }

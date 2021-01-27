@@ -1,8 +1,9 @@
 // Bacis self-logger
 
+const logStore = {};
+const errStore = {};
+
 const Logable = {
-    logStore: [],
-    errStore: [],
     logging: true,
     logLimit: 10,
     logType: '',
@@ -29,13 +30,16 @@ const Logable = {
     log: function(text, data) {
         if (this.logging) {
 
+            if (!logStore[this.name]) {
+                logStore[this.name] = [];
+            }
             const rec = this.make(text, data)
 
             console.log(this.logType, '>> [' + this.name + '] >>', rec.text, data || '');
 
-            this.logStore.push(rec);
-            if (this.logStore.length > this.logLimit) {
-                this.logStore.shift();
+            logStore[this.name].push(rec);
+            if (logStore[this.name].length > this.logLimit) {
+                logStore[this.name].shift();
             }
         }
     },
@@ -44,11 +48,15 @@ const Logable = {
         if (this.logging) {
             const rec = this.make(text, data)
 
+            if (!errStore[this.name]) {
+                errStore[this.name] = [];
+            }
+
             console.log('ERROR>> [' + this.name + '] >>', rec.text, data || '');
 
-            this.errStore.push(rec);
-            if (this.errStore.length > this.logLimit) {
-                this.errStore.shift();
+            errStore[this.name].push(rec);
+            if (errStore[this.name].length > this.logLimit) {
+                errStore[this.name].shift();
             }
         }
 

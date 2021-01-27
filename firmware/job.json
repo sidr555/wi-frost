@@ -4,7 +4,7 @@
         "name": "start_moroz",
         "title": "Start compressor on warm moroz",
         "conditions": [
-            "./temp_moroz > 27",
+            "./temp_moroz > 25",
             "./heater = 0"
         ],
         "actions": {

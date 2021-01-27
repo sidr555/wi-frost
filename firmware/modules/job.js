@@ -67,7 +67,7 @@ class Job {
             //             // run job on unit dev update
             //             const name = topic.substr(2);
             //             if (this.unit.devs[name]) {
-            //                 this.unit.devs[name].sub(job.name, (name, value) => {
+            //                 this.unit.devs[name].sub(job.name, (value) => {
             //                     this.log('updated dev state: ' + name, job.topics);
             //                     this.topics[topic] = value;
             //                     if (this.matchConditions()) {
