@@ -8,9 +8,8 @@ class DallasTemp extends Actor {
             super(conf);
             this.id = id;
             this.dev = DS18B20.connect(bus, id);
-            //this.interval = null;
+            this.logType = "TempSensor";
             this.get();
-        // console.log("new DALLAS", id, this.name, conf.name, typeof conf)
         } catch (e) {
             console.log("Exception in dallastemp constructor", e);
             throw e;
@@ -19,7 +18,10 @@ class DallasTemp extends Actor {
     get() {
         // this.log("get temperature");
         this.dev.getTemp( (t) => {
-            this.set(t);
+            if (t !== null) {
+                // this.log("new temperature", [t]);
+                this.set(t);
+            }
         })
     }
 }

@@ -6,34 +6,90 @@ const logable = require('logable');
 class Worker {
     constructor(unit) {
         try {
-            this.name = 'worker';
+            this.name = unit.topic;
+            this.logType = 'Worker';
             this.unit = unit;
             this.conf = storage.readJSON("job.json");
+
             if (!this.conf) {
                 this.log("Не найдена конфигурация co списком работ job.json, создана пустая конфигурация.");
                 this.conf = [];
                 storage.writeJSON("job.json", this.conf);
             }
 
-            this.log("Construct WORKER", unit.topic);
+            this.currentJob = null;
 
+            this.log("Construct ", unit.topic);
 
             this.jobs = [];
-            if (this.conf.length) {
-                this.jobs = this.conf.map((conf) => {
-                    const job = new Job(conf, unit);
-                    job.logging = job.conf.log || false;
-                    job.silent = job.conf.silent || false;
-                    return job;
-                });
-
-
-            }
-
-            this.log("Worker jobs", this.jobs.length, unit.name);
         } catch (e) {
             console.log("Exception in worker constructor", e);
             throw e;
+        }
+    }
+
+    build() {
+        try {
+            //console.log('build worker', this.conf);
+            if (this.conf.length) {
+                this.jobs = this.conf.map((conf) => {
+                    //console.log('create job from conf', conf)
+                    const job = new Job(conf, this.unit);
+                    job.logging = job.conf.log || false;
+                    job.silent = job.conf.silent || false;
+                    console.log('build job')
+                    job.build({
+                        runner: this.runJob
+                    });
+
+                    // subscribe local events
+                    console.log('subscribe job', job.name)
+                    if (!job.buggy && !job.command) {
+                        Object.keys(job.topics).forEach((topic) => {
+                            if (topic.substr(0, 2) == './') {
+                                // run job on unit dev update
+                                this.log('subscribe local dev on topic', topic);
+                                const dev = this.unit.devs[topic.substr(2)];
+                                if (dev) {
+                                    dev.sub(job.name, (name, value) => {
+                                        this.log('updated dev state', [job.name, name, value, job.topics]);
+                                        job.topics[topic] = value;
+                                        this.log('updated dev state', {
+                                            job: job.name,
+                                            name: name,
+                                            devname: dev.name,
+                                            value: value,
+                                            topic: topic,
+                                            topics: job.topics
+                                        });
+                                        if (0 && job.matchConditions()) {
+                                            this.runJob(job);
+                                        }
+                                    });
+                                }
+                                // const name = topic.substr(2);
+                                // if (this.unit.devs[name]) {
+                                //     this.unit.devs[name].sub(job.name, (name, value) => {
+                                //         this.log('updated dev state', [job.name, name, value, job.topics]);
+                                //         job.topics[topic] = value;
+                                //         if (job.matchConditions()) {
+                                //             this.runJob(job);
+                                //         }
+                                //     });
+                                // }
+                            }
+                        });
+                    }
+
+                    return job;
+                });
+            }
+
+
+            this.log("Worker jobs", this.jobs.length, unit.name);
+
+        } catch(e) {
+            console.log("Exception in worker build", e)
         }
     }
 
@@ -43,22 +99,29 @@ class Worker {
         if (!job.active) {
             // todo some checks of previous job limits
 
+            if (this.currentJob && !this.currentJob.canBeStopped()) {
+                this.log('Can not stop current job ' + job.name);
+                return false;
+            }
+
             if (true) {
-                if (job.run()) {
-                    console.log('job is ran', job.name);
+                if (job.run(this.unit)) {
+                    this.log('job is ran successfully', job.name);
+                    return true;
                 }
             }
         }
+        return false;
     }
 
 
     useMQTT(mqtt) {
         try {
-            this.log("useMQTT", mqtt);
+            this.log("useMQTT");
 
             mqtt.sub(this.unit.topic + 'conf/unit/get', () => {
                 this.log('unit conf request recieved');
-                mqtt.pub(unit.topic + 'conf/unit', this.unit.conf);
+                mqtt.pub(this.unit.topic + 'conf/unit', this.unit.conf);
             });
             mqtt.sub(this.unit.topic + 'conf/jobs/get', () => {
                 this.log('jobs conf request recieved');
@@ -84,48 +147,38 @@ class Worker {
                 console.log("Broadcast unit dev`s updates", name)
                 let dev = this.unit.devs[name];
                 if (dev && !dev.silent) {
-                    dev.sub('mqtt', (value) => mqtt.pub(this.unit.topic + 'dev/' + name, value));
+                    dev.sub('mqtt', (name, value) => mqtt.pub(this.unit.topic + 'dev/' + name, value));
                 }
             });
 
             this.jobs.forEach((job) => {
-                if (job.command) {
-                    // run job on external run-command
-                    mqtt.sub(this.unit.topic + 'job/' + job.command, () => {
-                        if (job.matchConditions()) {
-                            this.runJob(job);
-                        }
-                    });
+                if (!job.buggy) {
 
-                } else {
-                    job.topics.forEach((topic) => {
-                        if (topic.substr(0, 2) == './') {
-                            // run job on unit dev update
-                            const name = topic.substr(2);
+                    if (job.command) {
+                        // run job on external run-command
+                        mqtt.sub(this.unit.topic + 'job/' + job.command, () => {
+                            if (job.matchConditions()) {
+                                this.runJob(job);
+                            }
+                        });
 
-                            if (this.unit.devs[name]) {
-                                this.unit.devs[name].sub(job.name, (value) => {
+                    } else {
+                        Object.keys(job.topics).forEach((topic) => {
+                            if (topic.substr(0, 2) !== './') {
+                                // run job on match any other mqtt topic
+                                mqtt.sub(topic, (name, value) => {
                                     job.topics[topic] = value;
                                     if (job.matchConditions()) {
                                         this.runJob(job);
                                     }
                                 });
                             }
-                        } else {
-                            // run job on match any other mqtt topic
-                            mqtt.sub(topic, (value) => {
-                                job.topics[topic] = value;
-                                if (job.matchConditions()) {
-                                    this.runJob(job);
-                                }
-                            });
-                        }
-                    });
+                        });
+                    }
                 }
-
             });
         } catch (e) {
-            console.log("useMQTT", e.message);
+            this.log("useMQTT", e.message);
             this.error("useMQTT", e);
         }
     }

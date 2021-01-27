@@ -5,6 +5,7 @@ const Logable = {
     errStore: [],
     logging: true,
     logLimit: 10,
+    logType: '',
 
     make: function(text, data) {
         if (typeof  text === 'object') {
@@ -30,7 +31,7 @@ const Logable = {
 
             const rec = this.make(text, data)
 
-            console.log('>> [' + this.name + '] >>', rec.text);
+            console.log(this.logType, '>> [' + this.name + '] >>', rec.text, data || '');
 
             this.logStore.push(rec);
             if (this.logStore.length > this.logLimit) {
@@ -43,7 +44,7 @@ const Logable = {
         if (this.logging) {
             const rec = this.make(text, data)
 
-            console.log('ERROR>> [' + this.name + '] >>', rec.text);
+            console.log('ERROR>> [' + this.name + '] >>', rec.text, data || '');
 
             this.errStore.push(rec);
             if (this.errStore.length > this.logLimit) {

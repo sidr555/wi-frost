@@ -6,11 +6,15 @@ class Condition {
     constructor(topic, operator, value) {
         try {
             // this.topic = topic.substr(0,2) === './' ? unittopic + 'dev/' + topic.substr(2) : topic;
-            this.topic = topic;
+            const tarr = topic.split(':');
+            this.topic = tarr[0];
+            this.property = tarr.length = 2 ? tarr[1] : null;
+
             this.operator = operator;
             this.value = value;
 
-            console.log('New condition', topic, operator, value);
+            //console.log('New condition', topic, operator, value);
+
         } catch (e) {
             console.log("Exception in unit constructor", e);
             throw e;
@@ -22,7 +26,7 @@ class Condition {
     }
 
     static parse(str) {
-        console.log('Parse condition from ', str);
+        //console.log('Parse condition from ', str);
 
         for (let i=0; i<operators.length; i++) {
             let arr = str.split(' ' + operators[i] + ' ');
@@ -35,7 +39,7 @@ class Condition {
     }
 
     match(currentValue) {
-        console.log('Check condition match value', this.toString(), currentValue);
+        //console.log('Check the value ' + value + ' match condition ' + this.toString());
 
         let value = this.value;
         if (this.topic === '#clock') {

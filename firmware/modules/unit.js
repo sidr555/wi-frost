@@ -36,15 +36,6 @@ class Unit {
                 }, {});
             }
 
-            // Object.keys(this.devs).forEach((name) => {
-            //     const dev = this.devs[name];
-            //     if (dev.conf) {
-            //         dev.silent = dev.conf.silent || false;
-            //         if (!dev.conf.log && dev.log) {
-            //             dev.logging = false;
-            //         }
-            //     }
-            // });
 
             this.startTimer();
 
@@ -54,6 +45,15 @@ class Unit {
             console.log("Cannot build unit constructor", e.message);
             throw e;
         }
+    }
+
+    build() {
+
+    }
+
+    getValue(name) {
+        const dev = this.devs[name];
+        return dev ? dev.value : null;
     }
 
     get topic() {

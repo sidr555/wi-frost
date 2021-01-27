@@ -23,7 +23,7 @@ class Dev {
 
     set(value, force) {
         if (this.value !== value) {
-            console.log("Set DEV value", this.name, value, force);
+            this.log("Set DEV value", [value, force]);
             this.value = value;
             this.pub(value);
             return true;

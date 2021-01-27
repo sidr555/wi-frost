@@ -12,6 +12,7 @@ try {
     try {
         const unit = new Unit();
         const worker = new Worker(unit);
+        worker.build();
     } catch(e) {
         console.log('Cannot construct base features, exit', e);
         blinker(5);

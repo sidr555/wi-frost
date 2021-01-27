@@ -6,11 +6,11 @@ const observable = require('observable');
 
 class Actor {
 
-    constructor(conf) {
+    constructor(conf, defaultValue) {
         this.conf = conf;
         this.name = conf.name;
         this.type = conf.type || "unknown";
-        this.value = conf.default || null;
+        this.value = conf.default || defaultValue || null;
 
         //console.log("New Actor", this.name, conf);
     }
@@ -21,7 +21,7 @@ class Actor {
 
     set(value, force) {
         if (this.value !== value) {
-            this.log(value, {force:force});
+            this.log(value);
             this.value = value;
             this.pub(value);
             return true;
@@ -30,6 +30,6 @@ class Actor {
     }
 }
 
-Object.assign(Actor.prototype, logable, timeable, observable);
+Object.assign(Actor.prototype, logable, timeable, observable, {'logType' : 'Actor'});
 
 module.exports = Actor;

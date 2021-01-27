@@ -10,11 +10,13 @@ const Observable = {
             if (typeof value === 'undefined') {
                 value = this.value
             }
-            // console.log("Publish value", this.name, value);
-            for (const handler of this.store) {
-                handler(value);
-            }
-            // this.store.forEach((listener) => listener(value));
+            console.log("Publish value", this.name, value);
+
+            Object.keys(this.store).forEach((name) => {
+                console.log("pub for job", name);
+                this.store[name](this.name, value);
+
+            });
         }
     }
 }

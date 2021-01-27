@@ -35,7 +35,7 @@
       "type": "relay",
       "name": "compressor",
       "title": "Компрессор",
-      "default": 1,
+      "default": 0,
       "minTime": "30m",
       "maxTime": null,
       "minRest": "30m",
@@ -46,7 +46,7 @@
       "type": "relay",
       "name": "compressor_fan",
       "title": "Вентилятор компрессора",
-      "default": 1
+      "default": 0
     },
     {
       "pin": 19,
