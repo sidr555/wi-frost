@@ -14,12 +14,29 @@ class Job {
 
             //console.log('New job', this.name, conf);
 
-            this.limits = {
-                minTime: null,
-                maxTime: null
-            };
+            // this.limits = {
+            //     minTime: null,
+            //     maxTime: null
+            // };
             this.conditions = [];
-            this.actions = {};         // object of dev_name: new_value
+            if (this.conf.actions) {
+                this.actions = this.conf.actions;
+            } else {
+                this.actions = {};         // object of dev_name: new_value
+                this.buggy = true;
+            }
+
+
+            if (this.conf.minTime) {
+                this.minTime = this.humanToSec(this.conf.minTime)
+            }
+
+            if (this.conf.maxTime) {
+                this.maxTime = this.humanToSec(this.conf.maxTime)
+            }
+
+            console.log('!!!!!' + this.name, this.minTime, this.maxTime);
+
             this.command = null;
 
         } catch(e) {
@@ -45,7 +62,10 @@ class Job {
                                     const condition = Condition.parse(chunk);
                                     if (condition) {
                                         this.conditions.push(condition);
-                                        this.topics[condition.topic] = 0//this.unit.getValue(condition.topic);
+
+                                        if (condition.devName) {
+                                            this.topics[condition.topic] = this.unit.getValue(condition.devName);
+                                        }
                                     } else {
                                         this.buggy = true;
                                     }
@@ -59,27 +79,6 @@ class Job {
             }
 
             console.log('  conditions:', this.conditions);
-
-
-            // if (!this.buggy && !this.command) {
-            //     Object.keys(this.topics).forEach((topic) => {
-            //         if (topic.substr(0, 2) === './') {
-            //             // run job on unit dev update
-            //             const name = topic.substr(2);
-            //             if (this.unit.devs[name]) {
-            //                 this.unit.devs[name].sub(job.name, (value) => {
-            //                     this.log('updated dev state: ' + name, job.topics);
-            //                     this.topics[topic] = value;
-            //                     if (this.matchConditions()) {
-            //                         params.runner(this);
-            //                         //this.runJob(job);
-            //                     }
-            //                 });
-            //             }
-            //         }
-            //     });
-            // }
-
 
             // this.force = false;
             // this.startTimer();
@@ -97,11 +96,9 @@ class Job {
 
             // todo compressor:rest
             const value = this.topics[condition.topic];
-            console.log('    conditions', condition.toString(), value, this.topics[condition.topic]);
-
-            this.log(condition.toString(), ' ??? ', value);
-            if (value !== null && condition.match(value)) {
-                console.log('Match!');
+            // this.log(condition.toString() + ' ??? ' + value);
+            if (condition.match(value)) {
+                this.log(condition.toString(), [value]);
                 count++;
             }
             return count;
@@ -117,7 +114,7 @@ class Job {
 
 
     run(force) {
-        this.log('Run!', {force: force});
+        this.log('Run job');
         // todo check limits
 
         // Check all the actions could ran
@@ -133,7 +130,7 @@ class Job {
             if (name[0] == '@' && this.notify(name.substr(1), value)) {
                 count++;
             } else if (this.unit.devs[name] && this.unit.devs[name].set(value)) {
-                this.log('Run action ' + name);
+                this.log('Run action ' + name, [value]);
                 count ++;
             }
             total++;
@@ -142,19 +139,23 @@ class Job {
 
         this.log('Run ' + count + '/' + total + ' actions');
 
+        this.startTimer();
+
         if (this.conf.maxTime) {
             setTimeout(() => this.stop(), this.conf.maxTime * 1000);
         }
 
-        return count === total;
+        return count && count === total;
     }
 
     stop() {
-        if (this.active) {
+        if (this.active && this.canBeStopped()) {
             console.log('Stop the job', this.name);
             this.startTime = 0;
             this.force = false;
+            return true;
         }
+        return false;
     }
 
     get active() {
@@ -162,7 +163,7 @@ class Job {
     }
 
     canBeStopped() {
-        if (this.conf.minTime > 0 && this.elapsedTime() < this.conf.minTime) {
+        if (this.minTime > 0 && this.elapsedTime() < this.minTime) {
             this.log("can not stop because of minTime");
             return false;
         }

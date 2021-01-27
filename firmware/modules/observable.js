@@ -16,7 +16,7 @@ const Observable = {
             // console.log("Publish value", this.name, value);
 
             Object.keys(store[this.name]).forEach((jobname) => {
-                console.log("pub for job", jobname);
+                //console.log("pub for job", jobname);
                 store[this.name][jobname](value);
 
             });

@@ -13,7 +13,8 @@ class Relay extends Actor {
             this.logType = 'Relay';
             // this.chk = chk
             console.log('RELAY on port ' + this.pin, this.name, ' : ', conf.default ? 'on' : 'off' );
-            setTimeout(() => this.set(this.value, true), 100);
+            // setTimeout(() => this.set(this.value, true), 2000);
+            this.set(this.value, true);
 
         } catch (e) {
             console.log("Exception in relay constructor", e);

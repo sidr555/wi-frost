@@ -10,7 +10,13 @@ class Actor {
         this.conf = conf;
         this.name = conf.name;
         this.type = conf.type || "unknown";
-        this.value = conf.default || defaultValue || null;
+
+        this.value = null;
+        if (typeof conf.default !== 'undefined') {
+            this.value = conf.default;
+        } else if (typeof defaultValue !== 'undefined') {
+            this.value = defaultValue;
+        }
 
         //console.log("New Actor", this.name, conf);
     }

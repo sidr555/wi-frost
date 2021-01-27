@@ -10,6 +10,9 @@ class Condition {
             this.topic = tarr[0];
             this.property = tarr.length = 2 ? tarr[1] : null;
 
+            this.local = this.topic.substr(0,2) === './';
+            this.devName = this.local ? this.topic.substr(2) : null;
+
             this.operator = operator;
             this.value = value;
 
@@ -39,13 +42,15 @@ class Condition {
     }
 
     match(currentValue) {
-        //console.log('Check the value ' + value + ' match condition ' + this.toString());
+
 
         let value = this.value;
         if (this.topic === '#clock') {
             currentValue = new Date();
             value = require('now').getTodayFromHuman(this.value);
         }
+
+        // console.log('Check the value ' + value + ' match condition ' + this.toString());
 
         switch (this.operator) {
             case 'run':

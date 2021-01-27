@@ -48,34 +48,20 @@ class Worker {
                         Object.keys(job.topics).forEach((topic) => {
                             if (topic.substr(0, 2) == './') {
                                 // run job on unit dev update
-                                this.log('subscribe local dev on topic', topic);
+                                //this.log('subscribe local dev on topic', topic);
                                 const dev = this.unit.devs[topic.substr(2)];
                                 if (dev) {
                                     dev.sub(job.name, (value) => {
-                                        this.log('updated dev state', [job.name, dev.name, value, job.topics]);
-                                        job.topics[topic] = value;
-                                        this.log('updated dev state', {
-                                            job: job.name,
-                                            name: dev.name,
-                                            value: value,
-                                            topic: topic,
-                                            topics: job.topics
-                                        });
-                                        if (job.matchConditions()) {
-                                            this.runJob(job);
+                                        if (!job.active) {
+                                            this.log(job.name + ' checks ' + dev.name + " : " + value);
+                                            this.log('topic ' + topic);
+                                            job.topics[topic] = value;
+                                            if (job.matchConditions()) {
+                                                this.runJob(job);
+                                            }
                                         }
                                     });
                                 }
-                                // const name = topic.substr(2);
-                                // if (this.unit.devs[name]) {
-                                //     this.unit.devs[name].sub(job.name, (value) => {
-                                //         this.log('updated dev state', [job.name, name, value, job.topics]);
-                                //         job.topics[topic] = value;
-                                //         if (job.matchConditions()) {
-                                //             this.runJob(job);
-                                //         }
-                                //     });
-                                // }
                             }
                         });
                     }
@@ -93,18 +79,18 @@ class Worker {
     }
 
     runJob(job) {
-        this.log('try to run job', job.name);
+        // this.log('try to run job', job.name);
 
         if (!job.active) {
             // todo some checks of previous job limits
 
-            if (this.currentJob && !this.currentJob.canBeStopped()) {
+            if (this.currentJob && !this.currentJob.stop()) {
                 this.log('Can not stop current job ' + job.name);
                 return false;
             }
 
             if (true) {
-                if (job.run(this.unit)) {
+                if (job.run()) {
                     this.log('job is ran successfully', job.name);
                     return true;
                 }
