@@ -11,6 +11,7 @@ class Job {
             this.name = conf.name || 'Unknown JOB';
             this.buggy = false; // true on some config errors
             this.unit = unit;
+            this.command = null;
 
             //console.log('New job', this.name, conf);
 
@@ -27,17 +28,22 @@ class Job {
             }
 
 
-            if (this.conf.minTime) {
-                this.minTime = this.humanToSec(this.conf.minTime)
+            // if (this.conf.minTime) {
+            //     this.minTime = this.humanToSec(this.conf.minTime)
+            // }
+            // if (this.conf.maxTime) {
+            //     this.maxTime = this.humanToSec(this.conf.maxTime)
+            // }
+            if (this.conf.timeout && this.conf.timeout.time) {
+                this.maxTime = this.humanToSec(this.conf.timeout.time)
             }
 
-            if (this.conf.maxTime) {
-                this.maxTime = this.humanToSec(this.conf.maxTime)
-            }
+            // this.log("Times", {
+            //     min: this.minTime,
+            //     max: this.maxTime
+            // });
 
-            console.log('!!!!!' + this.name, this.minTime, this.maxTime);
 
-            this.command = null;
 
         } catch(e) {
             console.log('Exception in job constructor', JSON.stringify(e))
@@ -80,9 +86,6 @@ class Job {
 
             console.log('  conditions:', this.conditions);
 
-            // this.force = false;
-            // this.startTimer();
-
             console.log('New Job - ' + this.name/*, this.conf*/);
         } catch (e) {
             console.log("Exception in job constructor", e);
@@ -123,6 +126,25 @@ class Job {
         this.force = force;
 
         let total = 0;
+
+        // Check all the actions can be set
+        const canSet = Object.keys(this.actions).reduce((canSet, name) => {
+            if (canSet && name[0] !== '@') {
+                const value = this.actions[name];
+                const dev = this.unit.devs[name];
+                if (!dev.canSet(value)) {
+                    canSet = false;
+                }
+            }
+            return canSet;
+        }, true);
+
+        if (!canSet) {
+            this.log("Some actions cannot be started");
+            return false;
+        }
+
+        // start actions
         const count = Object.keys(this.actions).reduce((count, name) => {
             const value = this.actions[name];
             // this.log('Try to run action', {name:name, value:value, force:force});
@@ -141,18 +163,27 @@ class Job {
 
         this.startTimer();
 
-        if (this.conf.maxTime) {
-            setTimeout(() => this.stop(), this.conf.maxTime * 1000);
-        }
-
         return count && count === total;
+    }
+
+
+    stopOnTimeout(seconds, next) {
+        this.stopid = setTimeout(() => {
+            this.log("STOP BY TIMER");
+            this.stop();
+
+            if (next) {
+                next();
+            }
+        }, seconds * 1000);
+
     }
 
     stop() {
         if (this.active && this.canBeStopped()) {
             console.log('Stop the job', this.name);
             this.startTime = 0;
-            this.force = false;
+            this.stopid = null;
             return true;
         }
         return false;

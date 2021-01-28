@@ -25,11 +25,17 @@ class Actor {
         return this.value;
     }
 
-    set(value, force) {
+    canSet(value) {
+        return true;
+    }
+
+    set(value) {
         if (this.value !== value) {
             this.log(value);
             this.value = value;
             this.pub(value);
+
+            this.startTimer();
             return true;
         }
         return false;

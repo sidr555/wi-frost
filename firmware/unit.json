@@ -36,9 +36,9 @@
       "name": "compressor",
       "title": "Компрессор",
       "default": 0,
-      "minTime": "30m",
-      "maxTime": null,
-      "minRest": "30m",
+      "minOnTime": "15m",
+      "minOffTime": "30m",
+      "schedule": [["2h", "7h"], ["7h15m", "7h55m"]],
       "log": 100
     },
     {

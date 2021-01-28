@@ -84,17 +84,28 @@ class Worker {
         if (!job.active) {
             // todo some checks of previous job limits
 
-            if (this.currentJob && !this.currentJob.stop()) {
-                this.log('Can not stop current job ' + job.name);
-                return false;
-            }
+            // if (this.currentJob && !this.currentJob.stop()) {
+            //     this.log('Can not stop current job ' + job.name);
+            //     return false;
+            // }
 
-            if (true) {
+            // if (true) {
                 if (job.run()) {
                     this.log('job is ran successfully', job.name);
+                    if (job.maxTime) {
+                        const nextJob = job.conf.timeout.next && this.jobs[job.conf.timeout.next] ? this.jobs[job.conf.timeout.next] : null;
+                        this.stopid = setTimeout(() => {
+                            this.log("STOP BY TIMER");
+                            this.stop();
+
+                            if (nextJob) {
+                                this.runJob(nextJob);
+                            }
+                        }, job.maxTime * 1000);
+                    }
                     return true;
                 }
-            }
+            // }
         }
         return false;
     }

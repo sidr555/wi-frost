@@ -36,9 +36,6 @@ class Unit {
                 }, {});
             }
 
-
-            this.startTimer();
-
             this.log("Unit devices", Object.keys(this.devs));
             this.log("1-wire IDs", this.devs.onewire.ids);
         } catch (e) {

@@ -10,8 +10,17 @@
         "actions": {
             "compressor": true
         },
-        "minTime": "1m",
-        "maxTime": "2m",
-        "log": 10
+
+        "timeout": {
+            "time": "2m",
+            "nextJob": "sleep"
+        },
+        "log": 10,
+
+        "deprecated": {
+            "minTime": "1m",
+            "maxTime": "2m",
+            "next": "sleep"
+        }
     }
 ]
