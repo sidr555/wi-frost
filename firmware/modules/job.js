@@ -38,13 +38,6 @@ class Job {
                 this.maxTime = this.humanToSec(this.conf.timeout.time)
             }
 
-            // this.log("Times", {
-            //     min: this.minTime,
-            //     max: this.maxTime
-            // });
-
-
-
         } catch(e) {
             console.log('Exception in job constructor', JSON.stringify(e))
         }
@@ -159,31 +152,19 @@ class Job {
             return count;
         }, 0);
 
-        this.log('Run ' + count + '/' + total + ' actions');
+        this.log('Started actions: ' + count + '/' + total);
+        this.log(' --- STARTED ---');
+
 
         this.startTimer();
 
         return count && count === total;
     }
 
-
-    stopOnTimeout(seconds, next) {
-        this.stopid = setTimeout(() => {
-            this.log("STOP BY TIMER");
-            this.stop();
-
-            if (next) {
-                next();
-            }
-        }, seconds * 1000);
-
-    }
-
     stop() {
-        if (this.active && this.canBeStopped()) {
-            console.log('Stop the job', this.name);
-            this.startTime = 0;
-            this.stopid = null;
+        if (this.active) {
+            this.log(' --- STOP ---');
+            this.startTimer();
             return true;
         }
         return false;
@@ -193,12 +174,6 @@ class Job {
         return this.startTime > 0;
     }
 
-    canBeStopped() {
-        if (this.minTime > 0 && this.elapsedTime() < this.minTime) {
-            this.log("can not stop because of minTime");
-            return false;
-        }
-    }
 
     notify(channel, value) {
         switch(channel) {

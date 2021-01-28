@@ -22,6 +22,7 @@ class Worker {
             this.log("Construct ", unit.topic);
 
             this.jobs = [];
+            this.currentJobNames = [];
         } catch (e) {
             console.log("Exception in worker constructor", e);
             throw e;
@@ -91,10 +92,13 @@ class Worker {
 
             // if (true) {
                 if (job.run()) {
+
+                    this.currentJobNames.push(job.name);
+
                     this.log('job is ran successfully', job.name);
                     if (job.maxTime) {
                         const nextJob = job.conf.timeout.next && this.jobs[job.conf.timeout.next] ? this.jobs[job.conf.timeout.next] : null;
-                        this.stopid = setTimeout(() => {
+                        setTimeout(() => {
                             this.log("STOP BY TIMER");
                             this.stop();
 
