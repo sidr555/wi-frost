@@ -25,6 +25,7 @@ const Timeable = {
 
     humanToSec: function(str) {
         const arr = this.fromHuman(str);
+        //console.log('human2sec', str, arr.s + 60*arr.m + 3600*arr.h + 86400*arr.d);
         if (arr) {
             return arr.s + 60*arr.m + 3600*arr.h + 86400*arr.d;
         }

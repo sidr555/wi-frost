@@ -1,6 +1,7 @@
 // Use this to work with 1-wire bus
 const Actor = require('actor');
 const DallasTemp = require('dallas_temp');
+const blinker = require('blinker');
 
 class OneWirePort extends Actor {
     constructor(conf, items) {
@@ -30,9 +31,12 @@ class OneWirePort extends Actor {
             });
 
             if (conf.time_check) {
-                setInterval(() => this.dallasTemps.forEach((item) => {
-                    item.get()
-                }), conf.time_check * 1000);
+                setInterval(() => {
+                    this.dallasTemps.forEach((item) => {
+                        item.get()
+                    });
+                    blinker(1, 300);
+                }, conf.time_check * 1000);
             }
         } catch (e) {
             console.log("Exception in 1wire constructor", e);

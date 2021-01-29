@@ -56,6 +56,18 @@ class Unit {
     get topic() {
         return this.location + '/' + this.name + '/';
     }
+
+    state() {
+        this.log("=== STATE ===");
+
+        return Object.keys(this.devs).reduce((result, dev) => {
+            if (dev.name) {
+                this.log(dev.name + ' ' + dev.value);
+                result[dev.name] = dev.value;
+            }
+            return result;
+        }, {});
+    }
 }
 
 Object.assign(Unit.prototype, logable, timeable, {logLimit: 1000});

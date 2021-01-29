@@ -12,15 +12,6 @@ class Relay extends Actor {
             this.pin = conf.pin;
             this.logType = 'Relay';
 
-            this.minOnTime = this.conf.minOnTime ? this.humanToSec(this.conf.minOnTime) : 0;
-            this.minOffTime = this.conf.minOffTime ? this.humanToSec(this.conf.minOffTime) : 0;
-
-            if (this.conf.schedule) {
-
-            }
-
-            // this.chk = chk
-            console.log('RELAY on port ' + this.pin, this.name, ' : ', conf.default ? 'on' : 'off' );
             // setTimeout(() => this.set(this.value, true), 2000);
             this.set(this.value, true);
 
@@ -32,17 +23,25 @@ class Relay extends Actor {
 
 
     canSet(value) {
-        if (super.beforeSet(value)) {
-            if (!this.value && value) {
-                if (this.schedule) {
-                    return false;
-                }
-                return !this.minOffTime || this.elapsedTime() >= this.minOffTime;
+        if (!super.canSet(value)) {
+            return false;
+        }
+        if (!this.value && value) {
+            if (this.conf.schedule) {
+                return false;
             }
-            if (this.value && !value) {
-                return !this.minOnTime || this.elapsedTime() >= this.minOnTime;
+            if (this.conf.minOnTime && this.elapsedTime() < this.humanToSec(this.conf.minOnTime)) {
+                this.log('Cannot set, minOnTime=' + this.conf.minOnTime, [this.elapsedTime()]);
+                return false;
             }
         }
+        if (this.value && !value) {
+            if (this.conf.minOffTime && this.elapsedTime() < this.humanToSec(this.conf.minOffTime)) {
+                this.log('Cannot set, minOffTime=' + this.conf.minOffTime, [this.elapsedTime()]);
+                return false;
+            }
+        }
+        return true;
     }
 
 

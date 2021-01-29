@@ -95,7 +95,7 @@ try {
             if (!wifion) {
                 connectWiFi();
             }
-        }, netconf.wifi.time_check * 1000);
+        }, netconf.wifi.time_check * 10 * 1000);
     }
 } catch(e) {
     console.log('Global catch', e);

@@ -9,22 +9,22 @@ class Worker {
             this.name = unit.topic;
             this.logType = 'Worker';
             this.unit = unit;
-            this.conf = storage.readJSON("job.json");
+            this.conf = storage.readJSON('job.json');
 
             if (!this.conf) {
-                this.log("Не найдена конфигурация co списком работ job.json, создана пустая конфигурация.");
+                console.log('Не найдена конфигурация co списком работ job.json, создана пустая конфигурация.');
                 this.conf = [];
-                storage.writeJSON("job.json", this.conf);
+                storage.writeJSON('job.json', this.conf);
             }
 
             this.currentJob = null;
 
-            this.log("Construct ", unit.topic);
+            //this.log('Construct ', unit.topic);
 
             this.jobs = [];
             this.currentJobNames = [];
         } catch (e) {
-            console.log("Exception in worker constructor", e);
+            console.log('Exception in worker constructor', e);
             throw e;
         }
     }
@@ -54,8 +54,8 @@ class Worker {
                                 if (dev) {
                                     dev.sub(job.name, (value) => {
                                         if (!job.active) {
-                                            this.log(job.name + ' checks ' + dev.name + " : " + value);
-                                            this.log('topic ' + topic);
+                                            this.log(job.name + ' checks ' + dev.name + ' : ' + value);
+                                            //this.log('topic ' + topic);
                                             job.topics[topic] = value;
                                             if (job.matchConditions()) {
                                                 this.runJob(job);
@@ -72,23 +72,19 @@ class Worker {
             }
 
 
-            this.log("Worker jobs", this.jobs.length, unit.name);
+            this.log('Worker jobs', this.jobs.length, unit.name);
 
         } catch(e) {
-            console.log("Exception in worker build", e)
+            console.log('Exception in worker build', e)
         }
     }
 
     runJob(job) {
-        // this.log('try to run job', job.name);
+        this.log('try to run job', job.name);
 
         if (!job.active) {
             // todo some checks of previous job limits
 
-            // if (this.currentJob && !this.currentJob.stop()) {
-            //     this.log('Can not stop current job ' + job.name);
-            //     return false;
-            // }
 
             // if (true) {
                 if (job.run()) {
@@ -96,13 +92,17 @@ class Worker {
                     this.currentJobNames.push(job.name);
 
                     this.log('job is ran successfully', job.name);
+
                     if (job.maxTime) {
-                        const nextJob = job.conf.timeout.next && this.jobs[job.conf.timeout.next] ? this.jobs[job.conf.timeout.next] : null;
+                        this.log("timeout", job.maxTime);
+                        const nextJob = this.jobs.find((j) => job.conf.timeout.nextJob && j.name === job.conf.timeout.nextJob);
+                        this.log('next job =', nextJob.name);
                         setTimeout(() => {
-                            this.log("STOP BY TIMER");
-                            this.stop();
+                            this.log('STOP BY TIMER');
+                            job.stop();
 
                             if (nextJob) {
+                                this.log('next job ', nextJob.name);
                                 this.runJob(nextJob);
                             }
                         }, job.maxTime * 1000);
@@ -117,7 +117,7 @@ class Worker {
 
     useMQTT(mqtt) {
         try {
-            this.log("useMQTT");
+            this.log('useMQTT');
 
             mqtt.sub(this.unit.topic + 'conf/unit/get', () => {
                 this.log('unit conf request recieved');
@@ -144,7 +144,7 @@ class Worker {
 
             // Broadcast unit dev`s updates
             Object.keys(this.unit.devs).forEach((name) => {
-                console.log("Broadcast unit dev`s updates", name)
+                console.log('Broadcast unit dev`s updates', name)
                 let dev = this.unit.devs[name];
                 if (dev && !dev.silent) {
                     dev.sub('mqtt', (value) => mqtt.pub(this.unit.topic + 'dev/' + name, value));
@@ -178,8 +178,8 @@ class Worker {
                 }
             });
         } catch (e) {
-            this.log("useMQTT", e.message);
-            this.error("useMQTT", e);
+            this.log('useMQTT', e.message);
+            this.error('useMQTT', e);
         }
     }
 }
